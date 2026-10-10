@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 Lusoris <lusoris@proton.me>
+# SPDX-License-Identifier: EUPL-1.2
+
+version = 1
+
+# Code, schemas and configuration: EUPL-1.2
+[[annotations]]
+path = ["**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Lusoris <lusoris@proton.me>"
+SPDX-License-Identifier = "EUPL-1.2"
+
+# Documentation, prose and architectural decision records: CC BY-SA 4.0
+[[annotations]]
+path = ["docs/**", "wiki/**", "README.md"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Lusoris <lusoris@proton.me>"
+SPDX-License-Identifier = "CC-BY-SA-4.0"

@@ -1,0 +1,99 @@
+site_name: emBodied
+site_description: >-
+  A private, international adult platform for the realistic modelling, representation,
+  discussion and experience of human bodies, sexuality and intimacy.
+docs_dir: docs
+use_directory_urls: true
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.superfences
+
+nav:
+  - Home: index.md
+  - Master Concept: MASTER_CONCEPT.md
+  - Concept:
+      - Overview: concept/README.md
+      - Core:
+          - identity: concept/l1-core/identity.md
+          - consent: concept/l1-core/consent.md
+          - anatomy: concept/l1-core/anatomy.md
+          - measurement: concept/l1-core/measurement.md
+          - verification: concept/l1-core/verification.md
+          - reference: concept/l1-core/reference.md
+          - statistics: concept/l1-core/statistics.md
+      - Intelligence:
+          - body-vector: concept/l2-intelligence/body-vector.md
+          - knowledge-graph: concept/l2-intelligence/knowledge-graph.md
+          - statistics-engine: concept/l2-intelligence/statistics-engine.md
+          - simulation: concept/l2-intelligence/simulation.md
+          - learning: concept/l2-intelligence/learning.md
+      - Expression:
+          - visualizer: concept/l3-expression/visualizer.md
+          - avatar: concept/l3-expression/avatar.md
+          - media: concept/l3-expression/media.md
+          - tagging: concept/l3-expression/tagging.md
+          - moderation: concept/l3-expression/moderation.md
+      - Presence:
+          - device: concept/l4-presence/device.md
+          - embodiment: concept/l4-presence/embodiment.md
+          - rooms: concept/l4-presence/rooms.md
+          - social-vr: concept/l4-presence/social-vr.md
+          - live: concept/l4-presence/live.md
+      - Community:
+          - spaces: concept/l5-community/spaces.md
+          - education: concept/l5-community/education.md
+          - progress: concept/l5-community/progress.md
+          - professional: concept/l5-community/professional.md
+      - Cross-cutting:
+          - telemetry: concept/cross-cutting/telemetry.md
+          - search: concept/cross-cutting/search.md
+          - notification: concept/cross-cutting/notification.md
+          - admin: concept/cross-cutting/admin.md
+          - extensibility: concept/cross-cutting/extensibility.md
+  - Decisions:
+      - Index: adr/README.md
+      - ADR-0000 Record architecture decisions: adr/0000-record-architecture-decisions.md
+      - ADR-0001 Go/Rust/Svelte split: adr/0001-go-rust-svelte-split.md
+      - ADR-0002 Persistence split: adr/0002-relational-vector-graph-persistence.md
+      - ADR-0003 Anatomy-first feature model: adr/0003-anatomy-first-feature-model.md
+      - ADR-0004 Two-tier identity: adr/0004-two-tier-identity.md
+      - ADR-0005 No editorial classification: adr/0005-no-editorial-classification.md
+      - ADR-0006 Graded verification: adr/0006-graded-verification-subsystem.md
+      - ADR-0007 Reference data separation: adr/0007-user-reference-data-separation.md
+      - ADR-0008 Population comparison: adr/0008-population-comparison-as-regional-adaptation.md
+      - ADR-0009 Learned body-vector: adr/0009-learned-body-vector.md
+      - ADR-0010 Buttplug device control: adr/0010-buttplug-device-control.md
+      - ADR-0011 Split licensing: adr/0011-split-licensing-reuse.md
+      - ADR-0012 Consent as only hard boundary: adr/0012-consent-as-only-hard-boundary.md
+      - Template: adr/template.md
+  - Design basis:
+      - Open questions: design-basis/OPEN-QUESTIONS.md
+      - Gap and deduplication pass: design-basis/GAP-AND-DEDUPLICATION.md
+  - Role views:
+      - Users: user/README.md
+      - Moderators: moderator/README.md
+      - Administrators: admin/README.md
+      - Developers: dev/README.md
+      - AI agents: ai/README.md

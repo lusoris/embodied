@@ -1,0 +1,23 @@
+# Fail closed: nothing is tracked unless its file type is allowed below.
+# A new file type is admitted by adding one line here, in a reviewed commit.
+*
+!*/
+!.gitignore
+!*.md
+!*.txt
+!*.toml
+!*.yml
+!*.yaml
+
+# Never tracked, whatever the type
+.workingdir/
+.workingdir2/
+.scratch/
+.local-notes/
+.claude/settings.local.json
+.claude/*.local.*
+.env
+.env.*
+site/
+.cache/
+.mkdocs-cache/
