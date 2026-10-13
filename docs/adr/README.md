@@ -13,7 +13,7 @@ Once an ADR's status is **Accepted**, its body is **frozen**. To change a decisi
 **Solo-repo relaxation:** as this is a single-owner repository, the owner may edit ADRs directly. Agents may not — an agent changing an Accepted decision writes a superseding ADR.
 
 ## References sections
-The `## References` section is an audit trail. Cite documents, requirements and open questions exactly. Cite owner statements in paraphrase, marked "(paraphrased)", with date and topic; their original wording stays in the private `.workingdir2/` ledger and is never committed. (Elsewhere, paraphrase user input to neutral English.)
+The `## References` section is an audit trail. Cite documents, requirements and open questions exactly. Cite owner statements in paraphrase, marked "(paraphrased)", with date and topic; their original wording stays in the private `.workingdir/` ledger and is never committed. (Elsewhere, paraphrase user input to neutral English.)
 
 ## Index
 - [0000](0000-record-architecture-decisions.md) — Record architecture decisions *(Accepted)*
