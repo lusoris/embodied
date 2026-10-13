@@ -28,7 +28,7 @@ across the sibling repositories in this collection.
   into neutral English.
 - `## References` is an audit trail. Documents are cited by their exact wording. Owner statements
   are cited in paraphrase, marked as such, with date and topic; their original wording stays in
-  the private `.workingdir2/` ledger and is never committed.
+  the private `.workingdir/` ledger and is never committed.
 - Accepted ADRs are frozen. Changing a decision means writing a superseding ADR.
 
 ## Consequences
