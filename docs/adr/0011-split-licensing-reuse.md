@@ -70,5 +70,5 @@ every document. The sibling convention uses aggregate annotations, and it was fo
   v1.2) for all Go code, Rust crates, scripts, and schemas. **CC BY-SA 4.0** ... for all
   documentation, prose, and architectural decision records. **REUSE v3.2 Compliance**: Fully
   annotated with SPDX headers and a root `REUSE.toml` mapping file."
-- `lusoris/praetor` `REUSE.toml` — aggregate annotation pattern
+- `cordanaLLM/praetor` `REUSE.toml` — aggregate annotation pattern
 - [buttplug.io](https://buttplug.io/) — BSD-3-Clause, compatible with EUPL-1.2
