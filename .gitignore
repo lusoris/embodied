@@ -8,6 +8,7 @@
 !*.toml
 !*.yml
 !*.yaml
+!/LICENSE
 
 # Never tracked, whatever the type
 .workingdir/
