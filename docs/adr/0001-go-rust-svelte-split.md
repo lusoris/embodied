@@ -79,5 +79,5 @@ first-paint quality and form actions. Rejected in favour of full-stack SvelteKit
   operations"
 - `cordanaLLM/Tribunus` `tribunus-description-v2.md`: "Core Technologies: Go 1.27+ (Control
   Plane), Rust 1.85+ (Graph Compute Kernel), Svelte 5 (UI Layer)"
-- `lusoris/praetor` `internal/flavor/definitions.go` — `go-service`, `rust-systems`,
+- `cordanaLLM/praetor` `internal/flavor/definitions.go` — `go-service`, `rust-systems`,
   `frontend-svelte` flavors
