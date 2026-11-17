@@ -13,19 +13,14 @@ A **view** into the canonical concept. Authority lives in
 
 ## Stack
 
-| Layer | Technology | Scope |
-| :--- | :--- | :--- |
-| Control plane | Go 1.27+ (`cmd/`, `internal/`) | API, sessions, orchestration, platform modules |
-| Compute kernel | Rust 1.85+ (`crates/`) | Vectors, graph, statistics, simulation, device control |
-| Interface | SvelteKit / Svelte 5 Runes (`ui/`) | SSR, routing, form actions, rendering |
-| Records | PostgreSQL | Accounts, consent, measurements, media metadata |
-| Vectors | Qdrant | Body-vectors; later text and media |
-| Graph | Memgraph | Provenance, relations, traversal |
+A Go control plane, a Rust compute kernel and a SvelteKit interface, over PostgreSQL, Qdrant and
+Memgraph. The decisions hold the versions, directories, scope of each layer and store, and the
+boundaries between them; this page does not repeat them:
 
-The Rust kernel owns everything quantitative. Go owns no numerical logic beyond assembling calls
-into it. Visualizer geometry compiles to WASM so client and server share one model.
-
-**Session authority stays in Go.** SvelteKit holds a cookie; it does not hold authority.
+- [ADR-0001](../adr/0001-go-rust-svelte-split.md) — languages, layers, the kernel boundary and
+  session authority
+- [ADR-0002](../adr/0002-relational-vector-graph-persistence.md) — the three stores and what each
+  holds
 
 ## Governance
 

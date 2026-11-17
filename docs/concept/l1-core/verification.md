@@ -12,14 +12,8 @@ Those look like different problems — one scientific, one trust-and-safety — 
 question asked by two callers: *how much should I trust this measurement?*
 
 So there is one subsystem producing **graded assertions**, and each consumer sets its own
-threshold.
-
-| Grade | Meaning |
-| :--- | :--- |
-| `self-reported` | The person entered it. No claim beyond that. |
-| `protocol-guided` | Entered while following a defined, versioned protocol. |
-| `evidenced` | Supported by artifact evidence assessed against that protocol. |
-| `witnessed` | Independently confirmed by a party other than the subject. |
+threshold. The four grades — `self-reported`, `protocol-guided`, `evidenced` and `witnessed` — and
+their meanings are defined in [ADR-0006](../../adr/0006-graded-verification-subsystem.md#decision).
 
 The grades are ordered and monotonic in trust, which is what lets consumers express policy as a
 threshold rather than a special case. Statistics may require `protocol-guided` for its user
