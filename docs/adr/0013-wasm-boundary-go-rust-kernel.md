@@ -68,16 +68,25 @@ Intiface Central, remains open.
    kernel requirement at load time.
 2. Exports are plain C-ABI functions over module linear memory: allocate, free, pointers and
    lengths, without wasm-bindgen, so browser and Go instantiate the same bytes. The back end
-   serves the browser the exact module it runs, named by its SHA-256.
+   serves the browser the exact module it runs, named by its SHA-256, and serves no other
+   version. Each request for a shared computation names the hash the browser loaded. When a
+   deployment has changed the module, the back end refuses that request with a version-mismatch
+   status, and the browser reloads the module before computing again, so both sides compute
+   with identical bytes.
 3. Data crosses by copy: Go writes inputs into module memory and reads results out. Neither
    side retains a pointer into the other's memory.
 4. Expected failures return a status code with an error record; a Rust panic aborts, becoming
    a WASM trap that wazero returns as an error. Go discards that instance and creates a fresh one.
 5. Every call runs under a context deadline with `WithCloseOnContextDone`, implementing
    HISS-02's explicit timeouts; cancellation closes the module and returns `sys.ExitError`.
+   Go discards that closed instance and creates a fresh one, as for a trap.
 6. wazero's `Call` is not goroutine-safe, so the back end maintains an instance pool with
    one call per instance at a time.
 7. Each module exports an ABI version that the loader checks.
+8. The module hash identifies code only. Model data crosses as input: the back end supplies the
+   `model_version` and `parameter_set` for each shared computation, the browser computes with
+   the values it received, and each result stores both with the module hash. This follows the
+   Simulation page, where a result stores the model version that produced it.
 
 The baseline checked here is wazero v1.12.0 (`github.com/tetratelabs/wazero`, Apache-2.0),
 whose Go module checksum is `h1:DuWcpNu/FzgEXgGBDp8J1Spc+CWOvvtvVyjKlaZopYU=`.
@@ -98,7 +107,8 @@ Gains:
 
 - No cgo: wazero is written in Go, so the Go build stays pure Go.
 - One binding form covers every server-side kernel call.
-- The artifact hash establishes shared-model identity between browser and server.
+- The module hash gives browser and server one code identity; with `model_version` and
+  `parameter_set` as inputs, both hosts compute the same model.
 - A kernel panic or trap returns an error without crashing the Go back end, as the spike showed.
 - Rejecting imports enforces the kernel's freedom from I/O.
 
