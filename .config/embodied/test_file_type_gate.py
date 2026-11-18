@@ -241,6 +241,24 @@ class FileTypeGateTests(unittest.TestCase):
         self.assertEqual(status, 1)
         self.assertIn("index changed while the gate ran; rerun", stderr)
 
+    def test_index_round_trip_cannot_hide_ignored_path(self):
+        """Look up ignored paths in the admission snapshot when the index changes and returns."""
+        (self.repo / "photo.jpg").write_bytes(b"plain text\n")
+        self.git("add", "--force", "--", "photo.jpg")
+        original = gate.list_ignored_paths
+
+        def drop_and_restore(*args):
+            """Unstage photo.jpg around the real lookup and stage it again (A, B, A)."""
+            self.git("rm", "--cached", "--quiet", "--", "photo.jpg")
+            try:
+                return original(*args)
+            finally:
+                self.git("add", "--force", "--", "photo.jpg")
+
+        status, stderr, _ = self.run_main_here("list_ignored_paths", side_effect=drop_and_restore)
+        self.assertEqual(status, 1)
+        self.assertIn("'photo.jpg': A: path ignored by the root .gitignore allow-list", stderr)
+
     def test_rejected_path_is_not_read_as_blob(self):
         """Report admission failures first and skip content reads for rejected paths."""
         (self.repo / "photo.jpg").write_bytes(b"binary\0")

@@ -150,9 +150,34 @@ def checkout_context(git):
     return top, env, None
 
 
-def staged_admission(git, top, env):
-    """Read staged policy and compare index snapshots around the ignored-path lookup.
+def write_snapshot_index(git, top, env, entries, index):
+    """Write entries to a new index file at index with git update-index --index-info.
 
+    Return None on success, or an error if git fails.
+    """
+    records = b"".join(
+        f"{mode} {oid} {stage}\t".encode("ascii") + os.fsencode(name) + b"\0"
+        for name, mode, oid, stage in entries
+    )
+    try:
+        result = subprocess.run(
+            [git, "update-index", "-z", "--index-info"],
+            cwd=top, env={**env, "GIT_INDEX_FILE": str(index)}, input=records,
+            capture_output=True, timeout=30,
+        )
+    except (OSError, subprocess.SubprocessError) as error:
+        return f"git update-index --index-info failed: {error}"
+    if result.returncode != 0:
+        detail = result.stderr.decode("utf-8", errors="replace").strip()
+        return f"git update-index --index-info failed (exit {result.returncode}): {detail}"
+    return None
+
+
+def staged_admission(git, top, env):
+    """Read the staged policy and look up ignored paths in one index snapshot.
+
+    The lookup runs on a private index written from the listed entries, so an index change
+    during it cannot change its answer; an index that differs afterwards fails closed.
     Return (entries, ignored, None), or (None, None, reason) on failure.
     """
     entries, error = list_staged_entries(git, top, env)
@@ -168,7 +193,12 @@ def staged_admission(git, top, env):
     with tempfile.TemporaryDirectory(prefix="file-type-policy-") as tmp:
         exclude = Path(tmp) / ".gitignore"
         exclude.write_bytes(blobs[oid])
-        ignored, error = list_ignored_paths(git, top, env, exclude)
+        index = Path(tmp) / "index"
+        error = write_snapshot_index(git, top, env, entries, index)
+        if error:
+            return None, None, error
+        snapshot = {**env, "GIT_INDEX_FILE": str(index)}
+        ignored, error = list_ignored_paths(git, top, snapshot, exclude)
     after, snapshot_error = list_staged_entries(git, top, env)
     if snapshot_error or entries != after:
         return None, None, "index changed while the gate ran; rerun"
