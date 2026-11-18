@@ -28,18 +28,21 @@ order to be more than a disclaimer.
 | pairing, outcome-report, experience | reported, paired-with, contributed-to |
 | space version, model | trained-on, produced-by |
 
-Traversal is **depth-bounded** (following Tribunus, `d_max = 12`) and acyclicity is verified before
-commit. HISS-01 forbids recursion and HISS-02 requires bounded iteration, which for a graph engine
-means Kahn's-algorithm cycle checking on mutation rather than hoping traversals terminate.
+Traversal is **depth-bounded** (following
+[Epitrop](https://github.com/tekmora/epitrop/blob/main/docs/architecture-v2.md), `d_max = 12`)
+and acyclicity is verified before commit. HISS-01 forbids recursion and HISS-02 requires bounded
+iteration, which for a graph engine means Kahn's-algorithm cycle checking on mutation rather than
+hoping traversals terminate.
 
 ## Why a dedicated engine
 
 Memgraph rather than the graph living inside the Rust kernel in memory, or inside Postgres via an
 extension. The reasoning is in [ADR-0002](../../adr/0002-relational-vector-graph-persistence.md);
-the short form is that this graph is not hydrated from a handful of GitOps files as Tribunus's is —
-it grows monotonically with user activity, it must survive restarts without a rebuild window, and
-openCypher is a considerably better tool for the traceability queries above than hand-written
-traversal.
+the short form is that Epitrop rebuilds its task graph from its event log alone (section "Event
+log" of its [architecture](https://github.com/tekmora/epitrop/blob/main/docs/architecture-v2.md)),
+while this graph has no such log to replay — it grows monotonically with user activity, it must
+survive restarts without a rebuild window, and openCypher is a considerably better tool for the
+traceability queries above than hand-written traversal.
 
 The cost is honest and stated: **three stateful systems** — Postgres, Qdrant, Memgraph — each with
 its own backup, failover and consistency story. Cross-store consistency is the price of
