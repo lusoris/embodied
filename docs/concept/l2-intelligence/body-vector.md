@@ -44,8 +44,11 @@ The space is **versioned**. A refit produces a new space, not a silent redefinit
 
 ## Implementation
 
-SIMD similarity via `simsimd`, following `crates/tribunus-graph` — cosine and Euclidean across
-f32/f16/i8, AVX2/AVX-512 and NEON. Qdrant holds the index; the crate owns projection, distance
+SIMD similarity follows the Rust vector kernel of
+[Epitrop](https://github.com/tekmora/epitrop/blob/main/docs/epitrop-description-v2.md): cosine
+and Euclidean distance over f32, f16 and i8 vectors. Two further choices are this project's own
+and not taken from Epitrop: the `simsimd` crate as the implementation, and AVX2, AVX-512 and NEON
+as the instruction sets it must cover. Qdrant holds the index; the crate owns projection, distance
 semantics and versioning.
 
 HISS constraints apply: bounded loops, no recursion, explicit deadlines on every call out to the

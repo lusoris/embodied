@@ -61,7 +61,7 @@ Numbering is append-only. Never reuse, never renumber.
 | OQ-019 | How many outcomes before a refit is defensible, and what is shown in the meantime? | Open | A space that has learned nothing must not present itself as though it has. | A refit threshold and a cold-start presentation. |
 | OQ-020 | Does the space include features with no reference distribution to normalise against? | Open | — | A decision tied to OQ-007 coverage. |
 | OQ-021 | Cross-store write consistency: what is the transaction boundary when one outcome report writes to Postgres, Qdrant and Memgraph? | Open | `learning` owns the write path. Boundary undefined. | A consistency and reconciliation design. |
-| OQ-022 | Does `d_max = 12` suit this domain, or was it inherited from a differently shaped graph? | Open | Inherited from Tribunus. | Analysis of real traversal depths. |
+| OQ-022 | Does `d_max = 12` suit this domain, or was it inherited from a differently shaped graph? | Open | Inherited from Epitrop, where 12 is a proposed design parameter. | Analysis of real traversal depths. |
 | OQ-023 | Is the graph rebuildable from Postgres as a recovery path, and does that argue against a dedicated engine? | Open | — | A recovery design; may reopen ADR-0002. |
 | OQ-024 | Which distribution families are supported, and what happens when a source's summary statistics do not fit the assumed family? | Open | Veale et al. simulate from the normal; not every feature will be normal. | A family selection policy. |
 | OQ-025 | How are intervals combined when a simulation input is itself an estimate? | Open | Naive propagation yields useless widths; narrowing by assumption is dishonest. | An uncertainty propagation design. |

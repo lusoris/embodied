@@ -214,9 +214,15 @@ See [`spaces`](concept/l5-community/spaces.md), [`education`](concept/l5-communi
 ## 12. Architecture
 
 Planned stack ([ADR-0001](adr/0001-go-rust-svelte-split.md)):
-Go control plane, Rust compute kernel, Svelte 5 interface — following the `cordanaLLM/Tribunus`
-pattern. This repository holds the documentation and the checks that guard it;
-no application code exists in this repository yet.
+Go control plane, Rust compute kernel, Svelte 5 interface — following the
+[Epitrop](https://github.com/tekmora/epitrop/blob/main/docs/architecture-v2.md) pattern. This
+repository holds the documentation and the checks that guard it; no application code exists in
+this repository yet.
+
+> **Rename note.** Epitrop (eh-PEE-trop, from Greek *epitropos*, the appointed trustee) is the
+> agent runtime first published as `cordanaLLM/Tribunus`. It moved to
+> [`tekmora/epitrop`](https://github.com/tekmora/epitrop) on 2026-10-11, and the old address
+> redirects there. Accepted ADRs keep the name Tribunus where they quote its earlier documents.
 
 ```text
 [ SvelteKit / Svelte 5 UI ] <--- SSE / REST ---> [ Go Control Plane ]
