@@ -37,12 +37,12 @@ class FileTypeGateTests(unittest.TestCase):
             capture_output=True, timeout=10,
         ).stdout
 
-    def run_gate(self, env=None, stdin_data=b""):
+    def run_gate(self, env=None):
         return subprocess.run(
             [sys.executable, "-I", str(GATE)],
             cwd=self.repo,
             env=self.env if env is None else env,
-            input=stdin_data,
+            stdin=subprocess.DEVNULL,
             capture_output=True,
             timeout=30,
         )
@@ -94,7 +94,7 @@ class FileTypeGateTests(unittest.TestCase):
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertNotIn(b": A:", result.stderr)
 
-    def test_a_nested_gitignore_cannot_widen_root_allow_list(self):
+    def test_nested_gitignore_cannot_widen_root_allow_list(self):
         docs = self.repo / "docs"
         docs.mkdir(parents=True, exist_ok=True)
         (docs / ".gitignore").write_text("!*.csv\n!.gitignore\n", encoding="utf-8")
@@ -108,15 +108,15 @@ class FileTypeGateTests(unittest.TestCase):
             stderr,
         )
 
-    def test_b_staged_text_with_unstaged_binary_working_copy_passes(self):
+    def test_staged_text_with_unstaged_binary_working_copy_passes(self):
         (self.repo / "notes.md").write_bytes(b"Plain UTF-8 text.\n")
         self.git("add", "--force", "--", "notes.md")
         (self.repo / "notes.md").write_bytes(b"\x89PNG\r\n\x1a\n\x00")
-        result = self.run_gate(stdin_data=b"notes.md\0")
+        result = self.run_gate()
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stderr, b"")
 
-    def test_c_staged_binary_with_plain_working_copy_fails_b(self):
+    def test_staged_binary_with_plain_working_copy_fails_text_check(self):
         (self.repo / "scan.md").write_bytes(b"\x89PNG\r\n\x1a\n\x00")
         self.git("add", "--force", "--", "scan.md")
         (self.repo / "scan.md").write_bytes(b"Plain UTF-8 text.\n")
@@ -125,7 +125,7 @@ class FileTypeGateTests(unittest.TestCase):
         stderr = result.stderr.decode("utf-8", errors="replace")
         self.assertIn("'scan.md': B: NUL byte in staged blob", stderr)
 
-    def test_d_git_failure_exits_nonzero_with_reason(self):
+    def test_git_failure_exits_nonzero_with_reason(self):
         (self.repo / "notes.md").write_bytes(b"Plain UTF-8 text.\n")
         self.git("add", "--force", "--", "notes.md")
         broken_env = dict(self.env)
@@ -134,7 +134,7 @@ class FileTypeGateTests(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertIn("git ls-files -s failed", result.stderr.decode("utf-8", errors="replace"))
 
-    def test_e_empty_index_exits_nonzero(self):
+    def test_empty_index_exits_nonzero(self):
         result = self.run_gate()
         self.assertEqual(result.returncode, 1)
         self.assertIn("empty index", result.stderr.decode("utf-8", errors="replace"))
