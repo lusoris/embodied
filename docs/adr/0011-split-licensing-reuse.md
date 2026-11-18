@@ -72,7 +72,8 @@ every document. The sibling convention uses aggregate annotations, and it was fo
   annotated with SPDX headers and a root `REUSE.toml` mapping file."
 - Rename note, 2026-11-18: `cordanaLLM/Tribunus` is now
   [Epitrop](https://github.com/tekmora/epitrop) at `tekmora/epitrop` (renamed 2026-10-11; the old
-  address redirects). The wording quoted above is not in that repository's history (306 commits,
-  checked 2026-11-18).
+  address redirects). The wording quoted above is not in that repository's history: on
+  2026-11-18, `git log --all -S '<phrase>'` for each quoted phrase found no commit among the 306
+  commits on all refs of a clone at `0c759dbd`.
 - `cordanaLLM/praetor` `REUSE.toml` — aggregate annotation pattern
 - [buttplug.io](https://buttplug.io/) — BSD-3-Clause, compatible with EUPL-1.2

@@ -24,10 +24,12 @@ insight" would contradict every commitment the concept makes.
 | Consent-resolution performance | Which bodies a person compared against |
 | Moderation queue depth and age | Session-level behavioural traces |
 
-Following the `20 Watts` resource principles taken from Epitrop's early design (its current
-documents no longer state them), accounting is a first-class concern rather than an
-afterthought — compute spent on embedding refits, simulation and assisted tagging is ledgered,
-because those are the expensive paths and the ones most likely to grow silently.
+This project holds the `20 Watts` resource principles as its own. Earlier versions of this page
+named them as principles Epitrop adopts, but no revision of the Epitrop repository states them:
+`git log --all -S '20 Watts'` finds no commit in a clone at `0c759dbd` (checked 2026-11-18).
+Following them, accounting is a first-class concern rather than an afterthought — compute spent
+on embedding refits, simulation and assisted tagging is ledgered, because those are the expensive
+paths and the ones most likely to grow silently.
 
 ## The specific hazard
 

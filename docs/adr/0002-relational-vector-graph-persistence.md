@@ -86,6 +86,7 @@ in the area where mature implementations already exist.
   primary SoT, hydrated directly from GitOps files"
 - Rename note, 2026-11-18: `cordanaLLM/Tribunus` is now
   [Epitrop](https://github.com/tekmora/epitrop) at `tekmora/epitrop` (renamed 2026-10-11; the old
-  address redirects). The wording quoted above is not in that repository's history (306 commits,
-  checked 2026-11-18).
+  address redirects). The wording quoted above is not in that repository's history: on
+  2026-11-18, `git log --all -S '<phrase>'` for each quoted phrase found no commit among the 306
+  commits on all refs of a clone at `0c759dbd`.
 - `docs/concept/l2-intelligence/knowledge-graph.md` — `OQ-021`, `OQ-023`

@@ -83,8 +83,9 @@ the compatibility prediction that is the point of §5.
   embeddings using SIMD-accelerated vector distance calculations in Rust (`crates/tribunus-graph`)"
 - Rename note, 2026-11-18: `cordanaLLM/Tribunus` is now
   [Epitrop](https://github.com/tekmora/epitrop) at `tekmora/epitrop` (renamed 2026-10-11; the old
-  address redirects). The wording quoted above is not in that repository's history (306 commits,
-  checked 2026-11-18).
+  address redirects). The wording quoted above is not in that repository's history: on
+  2026-11-18, `git log --all -S '<phrase>'` for each quoted phrase found no commit among the 306
+  commits on all refs of a clone at `0c759dbd`.
 - `MASTER_CONCEPT.md` §6 (recovered draft): "Erfahrungsabgleich / Modell-Verbesserung / Lernendes
   System"
 - `docs/concept/l2-intelligence/body-vector.md` — `OQ-018`, `OQ-019`, `OQ-020`
