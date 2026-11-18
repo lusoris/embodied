@@ -84,4 +84,8 @@ in the area where mature implementations already exist.
   State-Graph as its primary Source of Truth (SoT)**"
 - `cordanaLLM/Tribunus` ADR-001: "Tribunus adopts an in-memory Graph and SIMD Vector-Tree as its
   primary SoT, hydrated directly from GitOps files"
+- Rename note, 2026-11-18: `cordanaLLM/Tribunus` is now
+  [Epitrop](https://github.com/tekmora/epitrop) at `tekmora/epitrop` (renamed 2026-10-11; the old
+  address redirects). The wording quoted above is not in that repository's history (306 commits,
+  checked 2026-11-18).
 - `docs/concept/l2-intelligence/knowledge-graph.md` — `OQ-021`, `OQ-023`

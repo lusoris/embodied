@@ -70,5 +70,9 @@ every document. The sibling convention uses aggregate annotations, and it was fo
   v1.2) for all Go code, Rust crates, scripts, and schemas. **CC BY-SA 4.0** ... for all
   documentation, prose, and architectural decision records. **REUSE v3.2 Compliance**: Fully
   annotated with SPDX headers and a root `REUSE.toml` mapping file."
+- Rename note, 2026-11-18: `cordanaLLM/Tribunus` is now
+  [Epitrop](https://github.com/tekmora/epitrop) at `tekmora/epitrop` (renamed 2026-10-11; the old
+  address redirects). The wording quoted above is not in that repository's history (306 commits,
+  checked 2026-11-18).
 - `cordanaLLM/praetor` `REUSE.toml` — aggregate annotation pattern
 - [buttplug.io](https://buttplug.io/) — BSD-3-Clause, compatible with EUPL-1.2

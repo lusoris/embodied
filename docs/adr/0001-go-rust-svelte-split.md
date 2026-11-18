@@ -79,5 +79,9 @@ first-paint quality and form actions. Rejected in favour of full-stack SvelteKit
   operations"
 - `cordanaLLM/Tribunus` `tribunus-description-v2.md`: "Core Technologies: Go 1.27+ (Control
   Plane), Rust 1.85+ (Graph Compute Kernel), Svelte 5 (UI Layer)"
+- Rename note, 2026-11-18: `cordanaLLM/Tribunus` is now
+  [Epitrop](https://github.com/tekmora/epitrop) at `tekmora/epitrop` (renamed 2026-10-11; the old
+  address redirects). The wording quoted above is not in that repository's history (306 commits,
+  checked 2026-11-18).
 - `cordanaLLM/praetor` `internal/flavor/definitions.go` — `go-service`, `rust-systems`,
   `frontend-svelte` flavors
