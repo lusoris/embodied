@@ -1,6 +1,7 @@
 # visualizer
 
-> **Layer:** L3 Expression · **Owner:** Rust geometry in `crates/`, compiled to WASM; Svelte 5 shell in `ui/`
+> **Layer:** L3 Expression · **Owner:** Rust geometry in `crates/`, compiled to WASM;
+> Svelte 5 shell in `ui/`
 
 ## Purpose
 

@@ -3,8 +3,8 @@ version: 1
 repository:
   owner: lusoris
   name: embodied
-  visibility: ""
-  description: ""
+  visibility: public
+  description: emBodied is the concept for a private, international adult platform for the realistic modelling, representation, discussion and experience of human bodies, sexuality and intimacy.
   homepage: ""
   topics: []
 profiles:
@@ -27,15 +27,15 @@ register:
         kind: message
         format: json
         selector: invariants.*
+overrides:
+  branch_protection:
+    # Declared 2026-11-18: one maintainer account, no review bot with approval rights.
+    # Restore independent review when a second reviewer exists.
+    review_mode: single_maintainer
 exceptions:
   - rule: HISS-11
     path: .github/workflows/release.yml
     reason: adoption found the release workflows short of the declared supply chain (SLSA Build Level 3 declared, Level 0 measured; enforce_cosign without a cosign signing step; require_sbom without an SBOM step); raise them as docs/guides/releasing.md in Praetor describes, then remove this entry
-    expires: "2027-02-16"
-    category: D
-  - rule: declared-linters
-    tool: gitleaks
-    reason: adoption scaffolds no CI job for gitleaks declared by profile "planning-artifacts"; run it in a workflow, or remove this entry
     expires: "2027-02-16"
     category: D
   - rule: declared-linters
