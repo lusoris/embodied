@@ -1,6 +1,8 @@
 # device
 
-> **Layer:** L4 Presence · **Owner:** Rust `crates/embodied-device` · **ADR:** [0010](../../adr/0010-buttplug-device-control.md)
+> **Layer:** L4 Presence · **Owner:** planned Rust `crates/embodied-device`
+> ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet) · **ADR:**
+> [0010](../../adr/0010-buttplug-device-control.md)
 
 ## Purpose
 
@@ -38,10 +40,11 @@ unbounded loop in this crate is a physical hazard.
 
 ## Integration shape
 
-The Buttplug library is depended on directly inside `crates/`. An internal device-capability
-interface sits in front of it so that callers speak in platform terms — intent, bounds, consent
-scope — rather than in device protocol, and so that a future backend can be added without touching
-callers.
+The Buttplug library will be depended on directly inside the planned `crates/` workspace
+([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet). An internal
+device-capability interface sits in front of it so that callers speak in platform terms — intent,
+bounds, consent scope — rather than in device protocol, and so that a future backend can be added
+without touching callers.
 
 Device discovery, pairing and connection stay client-side where the hardware is. The platform
 sends bounded intent; it does not reach into someone's Bluetooth stack.

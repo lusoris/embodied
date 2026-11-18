@@ -213,6 +213,7 @@ See [`spaces`](concept/l5-community/spaces.md), [`education`](concept/l5-communi
 
 ## 12. Architecture
 
+Planned stack ([ADR-0001](adr/0001-go-rust-svelte-split.md); no code exists in this repository yet):
 Go control plane, Rust compute kernel, Svelte 5 interface — following the `cordanaLLM/Tribunus`
 pattern.
 

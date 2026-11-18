@@ -61,7 +61,9 @@ jobs:
         run: |
           python3 -m venv "$RUNNER_TEMP/embodied-mkdocs"
           "$RUNNER_TEMP/embodied-mkdocs/bin/python" -m pip install \
-            --require-hashes -r .config/mkdocs/requirements.txt
+            --require-hashes -r .config/mkdocs/build-requirements.txt
+          "$RUNNER_TEMP/embodied-mkdocs/bin/python" -m pip install \
+            --require-hashes --no-build-isolation -r .config/mkdocs/requirements.txt
           "$RUNNER_TEMP/embodied-mkdocs/bin/mkdocs" build --strict -d "$RUNNER_TEMP/site"
   file-type:
     name: file-type gate
@@ -72,7 +74,7 @@ jobs:
       - *checkout
       - name: Check tracked file admission and text content
         if: github.event.pull_request.draft != true
-        run: git ls-files -z | python3 -I .config/embodied/file_type_gate.py
+        run: python3 -I .config/embodied/file_type_gate.py
       - name: Replay planted file admission cases
         if: github.event.pull_request.draft != true
         run: python3 -I -m unittest discover -s .config/embodied -p 'test_*.py'
@@ -94,4 +96,5 @@ jobs:
             "$RUNNER_TEMP/gitleaks.tar.gz" | sha256sum -c -
           tar --extract --gzip --file "$RUNNER_TEMP/gitleaks.tar.gz" \
             --directory "$RUNNER_TEMP" gitleaks
-          "$RUNNER_TEMP/gitleaks" git --redact --exit-code 1 .
+          python3 -I .config/embodied/secret_scan.py "$RUNNER_TEMP/gitleaks" .github/workflows/docs.yml
+          "$RUNNER_TEMP/gitleaks" git --redact --exit-code 1 --log-opts="--full-history --all --diff-filter=tuxdb -m" .

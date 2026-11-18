@@ -1,0 +1,8 @@
+# Build-backend dependencies for source-only archives in requirements.txt
+# (csscompressor==0.9.5 and jsmin==3.0.1 ship sdists only and use setuptools).
+# build-requirements.txt is the hash-locked file compiled from this input so
+# the main MkDocs install can run with --no-build-isolation.
+# Change a pin here, then regenerate the lock manually from this directory with:
+#   pip-compile --generate-hashes --allow-unsafe \
+#     --output-file=build-requirements.txt build-requirements.in
+setuptools==84.2.1

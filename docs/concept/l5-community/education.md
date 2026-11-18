@@ -1,6 +1,7 @@
 # education
 
-> **Layer:** L5 Community · **Owner:** Go `internal/education`
+> **Layer:** L5 Community · **Owner:** planned Go `internal/education`
+> ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet)
 
 ## Purpose
 

@@ -13,7 +13,9 @@ of the recovered draft this architecture replaces.
 Not modules but binding constraints on all of them: Praetor HISS-16 adoption, split licensing
 under REUSE v3.2, and the `AGENTS.md` canonical harness. See [docs/adr/](../adr/README.md).
 
-## L1 — Core platform · Go `internal/`
+## L1 — Core platform · planned Go `internal/`
+
+Target path from [ADR-0001](../adr/0001-go-rust-svelte-split.md); no code exists yet.
 
 | Module | Owns |
 | :--- | :--- |
@@ -25,7 +27,9 @@ under REUSE v3.2, and the `AGENTS.md` canonical harness. See [docs/adr/](../adr/
 | [reference](l1-core/reference.md) | Literature ingestion, versioning, citation trail |
 | [statistics](l1-core/statistics.md) | Percentiles, cohorts, comparison with uncertainty |
 
-## L2 — Intelligence · Rust `crates/`
+## L2 — Intelligence · planned Rust `crates/`
+
+Target path from [ADR-0001](../adr/0001-go-rust-svelte-split.md); no code exists yet.
 
 | Crate | Owns |
 | :--- | :--- |

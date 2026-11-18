@@ -1,6 +1,7 @@
 # media
 
-> **Layer:** L3 Expression · **Owner:** Go `internal/media`
+> **Layer:** L3 Expression · **Owner:** planned Go `internal/media`
+> ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet)
 
 ## Purpose
 

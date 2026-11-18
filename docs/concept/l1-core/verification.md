@@ -1,6 +1,8 @@
 # verification
 
-> **Layer:** L1 Core · **Owner:** Go `internal/verification` · **ADR:** [0006](../../adr/0006-graded-verification-subsystem.md)
+> **Layer:** L1 Core · **Owner:** planned Go `internal/verification`
+> ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet) · **ADR:**
+> [0006](../../adr/0006-graded-verification-subsystem.md)
 
 ## Purpose
 

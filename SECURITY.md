@@ -6,6 +6,6 @@ Only the latest release and current default branch receive security updates.
 
 ## Reporting a Vulnerability
 
-Please report security vulnerabilities privately to the maintainers rather
-than opening a public issue. Reports are investigated promptly under
-responsible disclosure guidelines.
+Do not open a public issue for a security vulnerability. Report it privately
+through this repository's **Security** tab by selecting **Report a
+vulnerability** (private vulnerability reporting).

@@ -1,6 +1,7 @@
 # embodiment
 
-> **Layer:** L4 Presence · **Owner:** Go `internal/embodiment`, geometry and device via `crates/`
+> **Layer:** L4 Presence · **Owner:** planned Go `internal/embodiment`, geometry and device via
+> `crates/` ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet)
 
 ## Purpose
 

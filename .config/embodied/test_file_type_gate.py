@@ -37,13 +37,22 @@ class FileTypeGateTests(unittest.TestCase):
             capture_output=True, timeout=10,
         ).stdout
 
-    def check_file(self, name, content):
-        (self.repo / name).write_bytes(content)
-        self.git("add", "--force", "--", name)
+    def run_gate(self, env=None, stdin_data=b""):
         return subprocess.run(
-            [sys.executable, "-I", str(GATE)], cwd=self.repo, env=self.env,
-            input=self.git("ls-files", "-z"), capture_output=True, timeout=30,
+            [sys.executable, "-I", str(GATE)],
+            cwd=self.repo,
+            env=self.env if env is None else env,
+            input=stdin_data,
+            capture_output=True,
+            timeout=30,
         )
+
+    def check_file(self, name, content):
+        target = self.repo / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(content)
+        self.git("add", "--force", "--", name)
+        return self.run_gate()
 
     def test_forced_add_fails_allow_list(self):
         for name in ("photo.JPG", "export.json"):
@@ -61,11 +70,17 @@ class FileTypeGateTests(unittest.TestCase):
                 self.assertNotIn("'scan.md': A:", result.stderr.decode())
 
     def test_plain_markdown_passes(self):
-        for name in ("notes.md", "notes with spaces.md", "notes\nline.md"):
+        for name in ("notes.md", "notes with spaces.md"):
             with self.subTest(path=name):
                 result = self.check_file(name, "Plain UTF-8 text: café.\n".encode())
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertEqual(result.stderr, b"")
+
+    @unittest.skipIf(os.name == "nt", "Windows NTFS forbids newline characters in filenames")
+    def test_newline_filename_passes(self):
+        result = self.check_file("notes\nline.md", "Plain UTF-8 text: café.\n".encode())
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stderr, b"")
 
     def test_removing_default_deny_admits_forced_files(self):
         ignore = self.repo / ".gitignore"
@@ -78,6 +93,51 @@ class FileTypeGateTests(unittest.TestCase):
                 result = self.check_file(name, b"plain text\n")
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertNotIn(b": A:", result.stderr)
+
+    def test_a_nested_gitignore_cannot_widen_root_allow_list(self):
+        docs = self.repo / "docs"
+        docs.mkdir(parents=True, exist_ok=True)
+        (docs / ".gitignore").write_text("!*.csv\n!.gitignore\n", encoding="utf-8")
+        (docs / "data.csv").write_text("col1,col2\n1,2\n", encoding="utf-8")
+        self.git("add", "--force", "--", "docs/.gitignore", "docs/data.csv")
+        result = self.run_gate()
+        self.assertEqual(result.returncode, 1)
+        stderr = result.stderr.decode("utf-8", errors="replace")
+        self.assertIn(
+            "'docs/data.csv': A: path ignored by the root .gitignore allow-list",
+            stderr,
+        )
+
+    def test_b_staged_text_with_unstaged_binary_working_copy_passes(self):
+        (self.repo / "notes.md").write_bytes(b"Plain UTF-8 text.\n")
+        self.git("add", "--force", "--", "notes.md")
+        (self.repo / "notes.md").write_bytes(b"\x89PNG\r\n\x1a\n\x00")
+        result = self.run_gate(stdin_data=b"notes.md\0")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stderr, b"")
+
+    def test_c_staged_binary_with_plain_working_copy_fails_b(self):
+        (self.repo / "scan.md").write_bytes(b"\x89PNG\r\n\x1a\n\x00")
+        self.git("add", "--force", "--", "scan.md")
+        (self.repo / "scan.md").write_bytes(b"Plain UTF-8 text.\n")
+        result = self.run_gate()
+        self.assertEqual(result.returncode, 1)
+        stderr = result.stderr.decode("utf-8", errors="replace")
+        self.assertIn("'scan.md': B: NUL byte in staged blob", stderr)
+
+    def test_d_git_failure_exits_nonzero_with_reason(self):
+        (self.repo / "notes.md").write_bytes(b"Plain UTF-8 text.\n")
+        self.git("add", "--force", "--", "notes.md")
+        broken_env = dict(self.env)
+        broken_env["GIT_DIR"] = str(self.repo / "missing-git-dir")
+        result = self.run_gate(env=broken_env)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("git ls-files -s failed", result.stderr.decode("utf-8", errors="replace"))
+
+    def test_e_empty_index_exits_nonzero(self):
+        result = self.run_gate()
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("empty index", result.stderr.decode("utf-8", errors="replace"))
 
 
 if __name__ == "__main__":

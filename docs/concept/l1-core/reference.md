@@ -1,6 +1,8 @@
 # reference
 
-> **Layer:** L1 Core · **Owner:** Go `internal/reference` + repository `lusoris/embodied-reference-data`
+> **Layer:** L1 Core · **Owner:** planned Go `internal/reference` + repository
+> `lusoris/embodied-reference-data` ([ADR-0001](../../adr/0001-go-rust-svelte-split.md),
+> [ADR-0007](../../adr/0007-user-reference-data-separation.md); no code exists yet)
 > **ADR:** [0007](../../adr/0007-user-reference-data-separation.md)
 
 ## Purpose

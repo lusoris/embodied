@@ -6,7 +6,7 @@ A **view** into the canonical concept, for agents working in this repository.
 
 `AGENTS.md` at the repository root is your operating harness and it is canonical. `CLAUDE.md`,
 `.cursor/rules/*.mdc`, `.windsurfrules`, `.gemini/GEMINI.md` and `.github/copilot-instructions.md`
-are **compiled from it** by `standardsctl compile-context`. Never edit a compiled target — the edit
+are **compiled from it** by `make compile-context`. Never edit a compiled target — the edit
 will be overwritten and will have created a second authority in the meantime.
 
 The recovered concept's §17 described this role as "read and propose". That remains accurate and

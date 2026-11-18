@@ -1,6 +1,8 @@
 # identity
 
-> **Layer:** L1 Core · **Owner:** Go `internal/identity` · **ADR:** [0004](../../adr/0004-two-tier-identity.md)
+> **Layer:** L1 Core · **Owner:** planned Go `internal/identity`
+> ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet) · **ADR:**
+> [0004](../../adr/0004-two-tier-identity.md)
 
 ## Purpose
 

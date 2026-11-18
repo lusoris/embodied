@@ -1,6 +1,7 @@
 # body-vector
 
-> **Layer:** L2 Intelligence · **Owner:** Rust `crates/embodied-vector` · **Store:** Qdrant
+> **Layer:** L2 Intelligence · **Owner:** planned Rust `crates/embodied-vector`
+> ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet) · **Store:** Qdrant
 > **ADR:** [0009](../../adr/0009-learned-body-vector.md)
 
 ## Purpose

@@ -40,6 +40,6 @@ exceptions:
     category: D
   - rule: declared-linters
     tool: semgrep
-    reason: adoption scaffolds no CI job for semgrep declared by profile "planning-artifacts", facet "agent:sandboxed"; run it in a workflow, or remove this entry
+    reason: adoption scaffolds no CI job for semgrep declared by profile "planning-artifacts", facet "agent:sandboxed"; add a CI job that runs semgrep, then remove this entry after that job passes
     expires: "2027-02-16"
     category: D

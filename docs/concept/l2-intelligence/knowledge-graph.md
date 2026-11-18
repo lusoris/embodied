@@ -1,6 +1,7 @@
 # knowledge-graph
 
-> **Layer:** L2 Intelligence · **Owner:** Rust `crates/embodied-graph` · **Store:** Memgraph
+> **Layer:** L2 Intelligence · **Owner:** planned Rust `crates/embodied-graph`
+> ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet) · **Store:** Memgraph
 > **ADR:** [0002](../../adr/0002-relational-vector-graph-persistence.md)
 
 ## Purpose

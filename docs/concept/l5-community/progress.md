@@ -1,6 +1,7 @@
 # progress
 
-> **Layer:** L5 Community · **Owner:** Go `internal/progress`
+> **Layer:** L5 Community · **Owner:** planned Go `internal/progress`
+> ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet)
 
 ## Purpose
 

@@ -11,8 +11,10 @@ marks the word *body* inside it.
 ## What this repository holds
 
 Planning documents only: the master concept, one page per module, the architectural decision
-records and the open questions. There is no code, no running service, no dataset and no media.
-Nothing here collects or stores data about anyone.
+records and the open questions. There is no product code, no running service, no dataset and no
+media; the only executable files are repository tooling: the file-type gate and its tests, which
+`make verify-all` runs, and the secret-scan replay, which the docs workflow runs. Nothing here
+collects or stores data about anyone.
 
 ## Adult subject matter and safety scope
 

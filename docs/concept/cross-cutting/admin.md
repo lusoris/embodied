@@ -1,6 +1,7 @@
 # admin
 
-> **Layer:** Cross-cutting · **Owner:** Go `internal/admin`, CLI `cmd/embodiedctl`
+> **Layer:** Cross-cutting · **Owner:** planned Go `internal/admin`, CLI `cmd/embodiedctl`
+> ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet)
 
 ## Purpose
 
