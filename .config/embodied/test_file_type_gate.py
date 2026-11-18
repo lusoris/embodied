@@ -38,10 +38,10 @@ class FileTypeGateTests(unittest.TestCase):
         (self.repo / GATE).parent.mkdir(parents=True)
         shutil.copyfile(ROOT / GATE, self.repo / GATE)
 
-    def git(self, *args):
+    def git(self, *args, stdin=None):
         """Run git with *args in the fixture repository and return stdout bytes."""
         return subprocess.run(
-            ["git", *args], cwd=self.repo, env=self.env, check=True,
+            ["git", *args], cwd=self.repo, env=self.env, input=stdin, check=True,
             capture_output=True, timeout=10,
         ).stdout
 
@@ -283,6 +283,48 @@ class FileTypeGateTests(unittest.TestCase):
         result = self.run_gate()
         self.assertEqual(result.returncode, 1)
         self.assertIn(b"100644", result.stderr)
+
+    def test_symbolic_link_fails_text_check(self):
+        """Reject a staged mode-120000 symbolic link with exit 1 and a B: symbolic link error."""
+        oid = self.git("hash-object", "-w", "--stdin", stdin=b"notes.md").decode().strip()
+        self.git("update-index", "--add", "--cacheinfo", f"120000,{oid},link.md")
+        result = self.run_gate()
+        self.assertEqual(result.returncode, 1)
+        stderr = result.stderr.decode("utf-8", errors="replace")
+        self.assertIn("'link.md': B: symbolic link", stderr)
+        self.assertNotIn("'link.md': A:", stderr)
+
+    def test_submodule_fails_text_check(self):
+        """Reject a staged mode-160000 gitlink with exit 1 and a B: submodule error."""
+        self.git(
+            "-c", "user.name=Test", "-c", "user.email=test@example.invalid",
+            "commit", "--quiet", "-m", "initial policy",
+        )
+        commit = self.git("rev-parse", "HEAD").decode().strip()
+        self.git("update-index", "--add", "--cacheinfo", f"160000,{commit},sub.md")
+        result = self.run_gate()
+        self.assertEqual(result.returncode, 1)
+        stderr = result.stderr.decode("utf-8", errors="replace")
+        self.assertIn("'sub.md': B: submodule", stderr)
+        self.assertNotIn("'sub.md': A:", stderr)
+
+    def test_unmerged_path_fails_text_check(self):
+        """Reject unmerged stages 1, 2, and 3 with exit 1 and a B: unmerged path error."""
+        base = self.git("hash-object", "-w", "--stdin", stdin=b"base\n").decode().strip()
+        ours = self.git("hash-object", "-w", "--stdin", stdin=b"ours\n").decode().strip()
+        theirs = self.git("hash-object", "-w", "--stdin", stdin=b"theirs\n").decode().strip()
+        records = (
+            f"100644 {base} 1\tconflict.md\n"
+            f"100644 {ours} 2\tconflict.md\n"
+            f"100644 {theirs} 3\tconflict.md\n"
+        ).encode("ascii")
+        self.git("update-index", "--index-info", stdin=records)
+        result = self.run_gate()
+        self.assertEqual(result.returncode, 1)
+        stderr = result.stderr.decode("utf-8", errors="replace")
+        self.assertIn("'conflict.md': B: unmerged path", stderr)
+        self.assertNotIn("'conflict.md': A:", stderr)
+        self.assertNotIn("Traceback", stderr)
 
 
 if __name__ == "__main__":
