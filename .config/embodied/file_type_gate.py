@@ -9,6 +9,10 @@ import sys
 
 
 def list_staged_entries(git, top):
+    """List staged index entries in top with git as (path, mode, oid, stage) tuples.
+
+    Return (entries, None) on success, or (None, error) if git fails or the index is empty.
+    """
     try:
         result = subprocess.run(
             [git, "ls-files", "-s", "-z"],
@@ -32,6 +36,10 @@ def list_staged_entries(git, top):
 
 
 def list_ignored_paths(git, top):
+    """List tracked paths in top matching top/.gitignore using the git executable.
+
+    Return (ignored_set, None) on success, or (None, error) if git ls-files -i fails.
+    """
     exclude = top / ".gitignore"
     try:
         result = subprocess.run(
@@ -48,6 +56,10 @@ def list_ignored_paths(git, top):
 
 
 def read_staged_blobs(git, top, oids):
+    """Read raw blob bytes for oids in top via git cat-file --batch.
+
+    Return ({oid: bytes}, None) on success, or (None, error) on git or header/blob failure.
+    """
     if not oids:
         return {}, None
     query = "".join(f"{oid}\n" for oid in oids).encode("ascii")
@@ -82,6 +94,11 @@ def read_staged_blobs(git, top, oids):
 
 
 def blob_text_failure(mode, stage, blobs, oid):
+    """Check that an index entry is a merged regular file whose blob is UTF-8 text without NULs.
+
+    Return None when valid, or a short reason (unmerged path, symbolic link, submodule,
+    unsupported mode, NUL byte, not UTF-8) when rejected.
+    """
     if stage != "0":
         return "unmerged path"
     if mode == "120000":
@@ -101,6 +118,10 @@ def blob_text_failure(mode, stage, blobs, oid):
 
 
 def main():
+    """Check staged index entries in cwd against root .gitignore and UTF-8 text rules.
+
+    Print any errors or violations to stderr and return exit status 0 on pass or 1 on failure.
+    """
     git = shutil.which("git")
     if git is None:
         print("file_type_gate: git not found on PATH", file=sys.stderr)

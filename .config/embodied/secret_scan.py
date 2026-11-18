@@ -15,6 +15,7 @@ import tempfile
 
 
 def clean_git_env():
+    """Return a copy of os.environ with GIT_* stripped and global/system Git config disabled."""
     env = {
         key: value for key, value in os.environ.items()
         if not key.startswith("GIT_")
@@ -43,6 +44,10 @@ def log_opts_of(tokens):
 
 
 def workflow_log_opts(workflow):
+    """Extract the gitleaks git --log-opts value from the workflow Path.
+
+    Return (log_opts, None) when exactly one non-empty option is found, or (None, error).
+    """
     found = []
     for number, line in enumerate(workflow.read_text(encoding="utf-8").splitlines(), 1):
         if "gitleaks" not in line:
@@ -63,6 +68,10 @@ def workflow_log_opts(workflow):
 
 
 def run_git(repo, env, *args, check=True):
+    """Run git *args in repo with env, a fixed replay identity and signing off.
+
+    Return the CompletedProcess; raise CalledProcessError on failure when check is true.
+    """
     cmd = [
         "git",
         "-c", "user.name=Replay",
@@ -76,6 +85,10 @@ def run_git(repo, env, *args, check=True):
 
 
 def build_merge_fixture(repo, env):
+    """Initialize a Git fixture in repo with env and commit a merge-only secret token.
+
+    Return the resulting merge commit SHA string.
+    """
     template = repo / "empty-template"
     template.mkdir()
     run_git(repo, env, "init", "--quiet", f"--template={template}")
@@ -103,6 +116,10 @@ def build_merge_fixture(repo, env):
 
 
 def replay(gitleaks, log_opts):
+    """Run gitleaks with and without log_opts against a temporary merge-secret fixture.
+
+    Return exit status 0 when log_opts detects the merge commit (rc 1), or 1 otherwise.
+    """
     env = clean_git_env()
     with tempfile.TemporaryDirectory(prefix="secret-scan-") as tmp:
         repo = Path(tmp)
@@ -134,6 +151,10 @@ def replay(gitleaks, log_opts):
 
 
 def main(argv):
+    """Parse argv=[prog, gitleaks, workflow] and replay the workflow gitleaks history scan.
+
+    Return exit status 0 on detection, 1 on workflow or replay failure, or 2 on bad usage.
+    """
     if len(argv) != 3:
         print("usage: secret_scan.py <gitleaks> <workflow>", file=sys.stderr)
         return 2
