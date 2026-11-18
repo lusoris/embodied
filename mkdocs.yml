@@ -87,6 +87,7 @@ nav:
       - ADR-0010 Buttplug device control: adr/0010-buttplug-device-control.md
       - ADR-0011 Split licensing: adr/0011-split-licensing-reuse.md
       - ADR-0012 Consent as only hard boundary: adr/0012-consent-as-only-hard-boundary.md
+      - ADR-0013 WebAssembly boundary between Go and the Rust kernel: adr/0013-wasm-boundary-go-rust-kernel.md
       - Template: adr/template.md
   - Design basis:
       - Open questions: design-basis/OPEN-QUESTIONS.md

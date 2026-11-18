@@ -29,3 +29,4 @@ The `## References` section is an audit trail. Cite documents, requirements and 
 - [0010](0010-buttplug-device-control.md) — Buttplug Rust library for physical device control *(Accepted)*
 - [0011](0011-split-licensing-reuse.md) — Split licensing: EUPL-1.2 code, CC BY-SA 4.0 docs, REUSE v3.2 *(Accepted)*
 - [0012](0012-consent-as-only-hard-boundary.md) — Consent as the only hard boundary, bound to artifacts *(Accepted)*
+- [0013](0013-wasm-boundary-go-rust-kernel.md) — WebAssembly boundary between Go and the Rust kernel *(Proposed)*
