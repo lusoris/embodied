@@ -61,6 +61,9 @@
 !/.config/mkdocs/build-requirements.txt
 !/.config/mkdocs/requirements.in
 
+# Documentation assets, admitted one exact path each.
+!/docs/assets/embodied-readme-banner.svg
+
 # Never tracked, whatever the type
 /lefthook-local.yml
 .scratch/
