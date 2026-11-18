@@ -97,4 +97,4 @@ jobs:
           tar --extract --gzip --file "$RUNNER_TEMP/gitleaks.tar.gz" \
             --directory "$RUNNER_TEMP" gitleaks
           python3 -I .config/embodied/secret_scan.py "$RUNNER_TEMP/gitleaks" .github/workflows/docs.yml
-          "$RUNNER_TEMP/gitleaks" git --redact --exit-code 1 --log-opts="--full-history --all --diff-filter=tuxdb -m" .
+          "$RUNNER_TEMP/gitleaks" git --redact --exit-code 1 --log-opts="--full-history --all --diff-filter=uxdb -m" .
