@@ -56,9 +56,19 @@ and *body*, and means to represent in a physical or concrete form
   or other media; the only picture is the title banner
   ([docs/assets/embodied-readme-banner.svg](docs/assets/embodied-readme-banner.svg)), an SVG text
   file that draws the project name. There is no personal data about any real person.
-- The only executable files are repository tooling in [.config/embodied/](.config/embodied/): the
-  file-type gate, the secret-scan replay and their tests, run by `make verify-all` and the Docs
-  workflow.
+- The tracked scripts form three groups: repository tooling in
+  [.config/embodied/](.config/embodied/) (the file-type gate, the secret-scan replay and their
+  tests, run by `make verify-all` and the Docs workflow), Git hook launchers in
+  [.config/lefthook/](.config/lefthook/) (run by [lefthook.yml](lefthook.yml)) and the agent
+  command guard [.config/agent/hooks/block_evasion.py](.config/agent/hooks/block_evasion.py),
+  written by Praetor adoption. The guard is the only file tracked as executable, and no tracked
+  file wires it.
+- The other build files are the [Makefile](Makefile), its include
+  [.config/praetor/engine.mk](.config/praetor/engine.mk) and the dev container in
+  [.devcontainer/](.devcontainer/). The container recipe
+  ([Dockerfile.praetor](.devcontainer/Dockerfile.praetor)) joins the base64 parts
+  `praetor-source.*.b64` into a Praetor source archive, checks it against a pinned SHA-256 digest
+  and builds the `praetorctl` command from it.
 - Consent is the platform's only hard boundary: every artifact carries the consent terms under
   which it may be seen, and a revoked grant reaches every copy derived from it
   ([ADR-0012](docs/adr/0012-consent-as-only-hard-boundary.md)).
