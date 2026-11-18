@@ -1,0 +1,11 @@
+# Copied from the Praetor MkDocs preset (https://github.com/cordanaLLM/praetor, docs/presets/mkdocs,
+# commit e6376bb852f1612c6b9dc38dd03372ee8e089ebb); same author and licence (EUPL-1.2).
+# Direct dependencies of the MkDocs preset, one exact pin each. requirements.txt is the
+# lock compiled from this file: every package the preset installs, pinned with hashes.
+# Change a pin here, then regenerate the lock manually from this directory with:
+#   uv pip compile --universal --generate-hashes --python-version=3.11 \
+#     requirements.in --output-file=requirements.txt
+mkdocs==1.6.1
+mkdocs-material==9.8.0
+mkdocs-minify-plugin==0.8.0
+pymdown-extensions==12.3

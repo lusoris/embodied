@@ -1,6 +1,8 @@
 # tagging
 
-> **Layer:** L3 Expression · **Owner:** Go `internal/tagging` · **ADR:** [0005](../../adr/0005-no-editorial-classification.md)
+> **Layer:** L3 Expression · **Owner:** planned Go `internal/tagging`
+> ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet) · **ADR:**
+> [0005](../../adr/0005-no-editorial-classification.md)
 
 ## Purpose
 

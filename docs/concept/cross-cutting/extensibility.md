@@ -1,6 +1,7 @@
 # extensibility
 
-> **Layer:** Cross-cutting · **Owner:** Go `internal/extensibility`
+> **Layer:** Cross-cutting · **Owner:** planned Go `internal/extensibility`
+> ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet)
 > **Added by:** gap pass — closes recovered §12 "Erweiterte Nutzung" (plugins)
 
 ## Purpose

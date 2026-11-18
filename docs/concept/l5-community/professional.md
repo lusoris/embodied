@@ -1,6 +1,7 @@
 # professional
 
-> **Layer:** L5 Community · **Owner:** Go `internal/professional`
+> **Layer:** L5 Community · **Owner:** planned Go `internal/professional`
+> ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet)
 > **Added by:** gap pass — closes recovered §12 "Erweiterte Nutzung"
 
 ## Purpose

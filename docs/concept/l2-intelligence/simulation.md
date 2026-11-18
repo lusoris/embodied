@@ -1,6 +1,7 @@
 # simulation
 
-> **Layer:** L2 Intelligence · **Owner:** Rust `crates/embodied-sim`
+> **Layer:** L2 Intelligence · **Owner:** planned Rust `crates/embodied-sim`
+> ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet)
 
 ## Purpose
 

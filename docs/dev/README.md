@@ -25,7 +25,7 @@ boundaries between them; this page does not repeat them:
 ## Governance
 
 Praetor HISS-16. `AGENTS.md` is canonical; `CLAUDE.md` and the other vendor targets are compiled
-from it by `standardsctl compile-context` — **do not edit them directly**.
+from it by `make compile-context` — **do not edit them directly**.
 
 Scaffolding comes from `standardsctl adopt`, which applies the `go-service`, `rust-systems` and
 `frontend-svelte` flavors. Do not hand-write what adoption generates.

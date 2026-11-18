@@ -1,6 +1,7 @@
 # search
 
-> **Layer:** Cross-cutting · **Owner:** Go `internal/search`
+> **Layer:** Cross-cutting · **Owner:** planned Go `internal/search`
+> ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet)
 
 ## Purpose
 

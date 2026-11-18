@@ -1,0 +1,45 @@
+---
+version: 1
+repository:
+  owner: lusoris
+  name: embodied
+  visibility: public
+  description: emBodied is the concept for a private, international adult platform for the realistic modelling, representation, discussion and experience of human bodies, sexuality and intimacy.
+  homepage: ""
+  topics: []
+profiles:
+  - planning-artifacts
+facets:
+  - agent:sandboxed
+register:
+  sources:
+    expected: 13
+    sha256:
+      sha256:5a3006d30f84ffb6255122d2ae162400f493ccdfbef1eebcecc9b14a35e2f5c7
+    inputs:
+      - path: .paperclip/harness.json
+        surface: prompts
+        kind: message
+        format: json
+        selector: operating_contract.*
+      - path: .paperclip/harness.json
+        surface: prompts
+        kind: message
+        format: json
+        selector: invariants.*
+overrides:
+  branch_protection:
+    # Declared 2026-11-18: one maintainer account, no review bot with approval rights.
+    # Restore independent review when a second reviewer exists.
+    review_mode: single_maintainer
+exceptions:
+  - rule: HISS-11
+    path: .github/workflows/release.yml
+    reason: adoption found the release workflows short of the declared supply chain (SLSA Build Level 3 declared, Level 0 measured; enforce_cosign without a cosign signing step; require_sbom without an SBOM step); raise them as docs/guides/releasing.md in Praetor describes, then remove this entry
+    expires: "2027-02-16"
+    category: D
+  - rule: declared-linters
+    tool: semgrep
+    reason: adoption scaffolds no CI job for semgrep declared by profile "planning-artifacts", facet "agent:sandboxed"; add a CI job that runs semgrep, then remove this entry after that job passes
+    expires: "2027-02-16"
+    category: D

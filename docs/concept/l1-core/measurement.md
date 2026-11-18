@@ -1,6 +1,7 @@
 # measurement
 
-> **Layer:** L1 Core · **Owner:** Go `internal/measurement`
+> **Layer:** L1 Core · **Owner:** planned Go `internal/measurement`
+> ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet)
 
 ## Purpose
 

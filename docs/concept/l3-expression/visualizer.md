@@ -1,6 +1,7 @@
 # visualizer
 
-> **Layer:** L3 Expression · **Owner:** Rust geometry in `crates/`, compiled to WASM; Svelte 5 shell in `ui/`
+> **Layer:** L3 Expression · **Owner:** planned Rust geometry in `crates/`, compiled to WASM;
+> Svelte 5 shell in `ui/` ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet)
 
 ## Purpose
 

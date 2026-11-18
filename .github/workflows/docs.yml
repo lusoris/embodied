@@ -1,0 +1,100 @@
+---
+# Gate documentation style, strict rendering, text-only file admission and secret
+# history scanning so the public repository keeps its documentation data boundary.
+name: Docs
+
+'on':
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: ['main']
+  merge_group:
+concurrency:
+  group: >-
+    ${{ github.workflow }}-${{ github.event.pull_request.number ||
+    github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  markdownlint:
+    name: markdownlint
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - &draft-stop
+        name: Stop on a draft pull request
+        if: github.event.pull_request.draft == true
+        shell: bash
+        env:
+          TITLE: Gate not run on a draft
+          MESSAGE: >-
+            The gate did not run because the pull request is a draft.
+            It runs when the pull request is marked ready for review.
+        run: |
+          echo "::error title=$TITLE::$MESSAGE"
+          echo "$MESSAGE" >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+      - &checkout
+        name: Check out the source
+        if: github.event.pull_request.draft != true
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: markdownlint
+        if: github.event.pull_request.draft != true
+        uses: DavidAnson/markdownlint-cli2-action@696eb3f2509270d7b882d2aa68347bc676e7af34  # v25.0.0
+        with:
+          globs: '**/*.md'
+  mkdocs:
+    name: mkdocs
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - *draft-stop
+      - *checkout
+      - name: Build documentation strictly
+        if: github.event.pull_request.draft != true
+        run: |
+          python3 -m venv "$RUNNER_TEMP/embodied-mkdocs"
+          "$RUNNER_TEMP/embodied-mkdocs/bin/python" -m pip install \
+            --require-hashes -r .config/mkdocs/build-requirements.txt
+          "$RUNNER_TEMP/embodied-mkdocs/bin/python" -m pip install \
+            --require-hashes --no-build-isolation -r .config/mkdocs/requirements.txt
+          "$RUNNER_TEMP/embodied-mkdocs/bin/mkdocs" build --strict -d "$RUNNER_TEMP/site"
+  file-type:
+    name: file-type gate
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - *draft-stop
+      - *checkout
+      - name: Check tracked file admission and text content
+        if: github.event.pull_request.draft != true
+        run: python3 -I .config/embodied/file_type_gate.py
+      - name: Replay planted file admission cases
+        if: github.event.pull_request.draft != true
+        run: python3 -I -m unittest discover -s .config/embodied -p 'test_*.py'
+  gitleaks:
+    name: gitleaks
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - *draft-stop
+      - *checkout
+      - name: Scan secret history
+        if: github.event.pull_request.draft != true
+        run: |
+          curl --fail --location --silent --show-error --max-time 120 \
+            --output "$RUNNER_TEMP/gitleaks.tar.gz" \
+            https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          printf '%s  %s\n' \
+            '551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb' \
+            "$RUNNER_TEMP/gitleaks.tar.gz" | sha256sum -c -
+          tar --extract --gzip --file "$RUNNER_TEMP/gitleaks.tar.gz" \
+            --directory "$RUNNER_TEMP" gitleaks
+          python3 -I .config/embodied/secret_scan.py "$RUNNER_TEMP/gitleaks" .github/workflows/docs.yml
+          "$RUNNER_TEMP/gitleaks" git --redact --exit-code 1 --log-opts="--full-history --all --diff-filter=uxdb -m" .

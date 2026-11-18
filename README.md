@@ -11,8 +11,10 @@ marks the word *body* inside it.
 ## What this repository holds
 
 Planning documents only: the master concept, one page per module, the architectural decision
-records and the open questions. There is no code, no running service, no dataset and no media.
-Nothing here collects or stores data about anyone.
+records and the open questions. There is no product code, no running service, no dataset and no
+media; the only executable files are repository tooling: the file-type gate and its tests, which
+`make verify-all` runs, and the secret-scan replay, which the docs workflow runs. Nothing here
+collects or stores data about anyone.
 
 ## Adult subject matter and safety scope
 
@@ -56,3 +58,25 @@ to verify.
 Concept stage. No implementation yet. The roadmap — phasing, jurisdiction, age
 verification, payments — is deliberately not decided; see
 [OPEN-QUESTIONS.md](docs/design-basis/OPEN-QUESTIONS.md).
+
+<!-- praetor:readme-governance:start -->
+[![HISS Adopted][praetor-hiss-badge]][praetor-hiss-agents]
+
+Praetor manages this repository's declared governance policy. This managed
+block records adoption state; it is not a verification certificate.
+
+**Verification**: `make verify-all` runs the repository's configured
+verification cascade.
+
+**HISS Audit**: `praetorctl audit` enforces policy, generated-surface
+integrity, and the debt ratchet.
+
+**Context Sync**: `praetorctl compile-context --verify` verifies every
+generated agent context against `AGENTS.md`.
+
+**Debt Baseline**: `.standards-baseline.json` anchors the debt ratchet at
+0 recorded infractions; audit forbids growth.
+
+[praetor-hiss-badge]: https://img.shields.io/badge/Standards-HISS%20Adopted-blue
+[praetor-hiss-agents]: https://github.com/lusoris/embodied/blob/HEAD/AGENTS.md
+<!-- praetor:readme-governance:end -->

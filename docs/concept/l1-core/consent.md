@@ -1,6 +1,8 @@
 # consent
 
-> **Layer:** L1 Core · **Owner:** Go `internal/consent` · **ADR:** [0012](../../adr/0012-consent-as-only-hard-boundary.md)
+> **Layer:** L1 Core · **Owner:** planned Go `internal/consent`
+> ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet) · **ADR:**
+> [0012](../../adr/0012-consent-as-only-hard-boundary.md)
 
 ## Purpose
 

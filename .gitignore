@@ -10,8 +10,59 @@
 !*.yaml
 !/LICENSE
 
+# Files the Praetor engine writes, admitted one exact path each (praetorctl adopt names them).
+!/.agents/skills/adhd-format/LICENSE
+!/.agents/skills/caveman/LICENSE
+!/.agents/skills/social-text/LICENSE
+!/.claude/settings.json
+!/.claude/skills/adhd-format/LICENSE
+!/.claude/skills/caveman/LICENSE
+!/.claude/skills/social-text/LICENSE
+!/.codex/hooks.json
+!/.config/agent/checkpoint.json
+!/.config/agent/hooks/block_evasion.py
+!/.config/lefthook/engine.sh
+!/.config/lefthook/python.sh
+!/.config/lefthook/scripts/checkpoint.py
+!/.config/lefthook/scripts/common.py
+!/.config/praetor/engine.mk
+!/.cursor/rules/hiss-invariants.mdc
+!/.devcontainer/Dockerfile.praetor
+!/.devcontainer/devcontainer.json
+!/.devcontainer/praetor-source.000.b64
+!/.devcontainer/praetor-source.001.b64
+!/.devcontainer/praetor-source.002.b64
+!/.devcontainer/praetor-source.003.b64
+!/.devcontainer/praetor-source.004.b64
+!/.devcontainer/praetor-source.005.b64
+!/.devcontainer/praetor-source.006.b64
+!/.devcontainer/praetor-source.007.b64
+!/.gemini/settings.json
+!/.gemini/settings.json.license
+!/.gitattributes
+!/.github/rulesets/main.json
+!/.mcp.json
+!/.mcp.json.license
+!/.paperclip/harness.json
+!/.standards-baseline.json
+!/.standards.lock
+!/.windsurfrules
+!/Makefile
+!/opencode.json
+!/opencode.json.license
+
+# Repository tooling, admitted one exact path each.
+!/renovate.json
+!/.config/embodied/file_type_gate.py
+!/.config/embodied/secret_scan.py
+!/.config/embodied/test_file_type_gate.py
+!/.config/embodied/test_secret_scan.py
+!/.config/mkdocs/build-requirements.in
+!/.config/mkdocs/build-requirements.txt
+!/.config/mkdocs/requirements.in
+
 # Never tracked, whatever the type
-.workingdir/
+/lefthook-local.yml
 .scratch/
 .local-notes/
 .claude/settings.local.json
@@ -21,3 +72,17 @@
 site/
 .cache/
 .mkdocs-cache/
+
+# BEGIN praetor private artifacts (praetorctl adopt)
+.workingdir/
+.workingdir2/
+/.standards/worktrees/
+/.agents/mcp_config.json
+/.standards/cache/
+/.claude/settings.local.json
+/.standards-receipt.json
+/.codacy/
+.github/instructions/codacy.instructions.md
+.cursor/rules/codacy.mdc
+!/.config/
+# END praetor private artifacts

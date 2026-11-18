@@ -1,6 +1,7 @@
 # statistics
 
-> **Layer:** L1 Core · **Owner:** Go `internal/statistics`, computing via `crates/embodied-stats`
+> **Layer:** L1 Core · **Owner:** planned Go `internal/statistics`, computing via
+> `crates/embodied-stats` ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet)
 > **ADR:** [0008](../../adr/0008-population-comparison-as-regional-adaptation.md)
 
 ## Purpose

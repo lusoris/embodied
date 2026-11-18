@@ -1,6 +1,7 @@
 # avatar
 
-> **Layer:** L3 Expression · **Owner:** Rust geometry in `crates/`, pipeline in Go `internal/avatar`
+> **Layer:** L3 Expression · **Owner:** planned Rust geometry in `crates/`, pipeline in Go
+> `internal/avatar` ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet)
 
 ## Purpose
 

@@ -1,6 +1,8 @@
 # anatomy
 
-> **Layer:** L1 Core · **Owner:** Go `internal/anatomy` · **ADR:** [0003](../../adr/0003-anatomy-first-feature-model.md)
+> **Layer:** L1 Core · **Owner:** planned Go `internal/anatomy`
+> ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet) · **ADR:**
+> [0003](../../adr/0003-anatomy-first-feature-model.md)
 
 ## Purpose
 

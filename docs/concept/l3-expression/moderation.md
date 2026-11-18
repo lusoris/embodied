@@ -1,6 +1,7 @@
 # moderation
 
-> **Layer:** L3 Expression · **Owner:** Go `internal/moderation`
+> **Layer:** L3 Expression · **Owner:** planned Go `internal/moderation`
+> ([ADR-0001](../../adr/0001-go-rust-svelte-split.md); no code exists yet)
 
 ## Purpose
 
