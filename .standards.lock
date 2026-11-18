@@ -1,0 +1,14 @@
+---
+version: 1
+pinned_version: v0.0.0+catalog.8d69aa79bff0
+digest: sha256:0620326fa4cd4f6af9d7b78b890df735884edaed2fa19fab82b51ebe041631e6
+profiles:
+  - id: planning-artifacts
+    version: v0.0.0+catalog.8d69aa79bff0
+    digest:
+      sha256:807ffc367c8da823720f50ada60790361f8db1bd4b436feec26cd45b276c3fa4
+facets:
+  - id: agent:sandboxed
+    version: v0.0.0+catalog.8d69aa79bff0
+    digest:
+      sha256:bc87486dea71e54d20549d6054dcf290d3d700e37b304cbdb6d6c1a2def895f2

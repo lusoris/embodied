@@ -1,0 +1,45 @@
+---
+version: 1
+repository:
+  owner: lusoris
+  name: embodied
+  visibility: ""
+  description: ""
+  homepage: ""
+  topics: []
+profiles:
+  - planning-artifacts
+facets:
+  - agent:sandboxed
+register:
+  sources:
+    expected: 13
+    sha256:
+      sha256:5a3006d30f84ffb6255122d2ae162400f493ccdfbef1eebcecc9b14a35e2f5c7
+    inputs:
+      - path: .paperclip/harness.json
+        surface: prompts
+        kind: message
+        format: json
+        selector: operating_contract.*
+      - path: .paperclip/harness.json
+        surface: prompts
+        kind: message
+        format: json
+        selector: invariants.*
+exceptions:
+  - rule: HISS-11
+    path: .github/workflows/release.yml
+    reason: adoption found the release workflows short of the declared supply chain (SLSA Build Level 3 declared, Level 0 measured; enforce_cosign without a cosign signing step; require_sbom without an SBOM step); raise them as docs/guides/releasing.md in Praetor describes, then remove this entry
+    expires: "2027-02-16"
+    category: D
+  - rule: declared-linters
+    tool: gitleaks
+    reason: adoption scaffolds no CI job for gitleaks declared by profile "planning-artifacts"; run it in a workflow, or remove this entry
+    expires: "2027-02-16"
+    category: D
+  - rule: declared-linters
+    tool: semgrep
+    reason: adoption scaffolds no CI job for semgrep declared by profile "planning-artifacts", facet "agent:sandboxed"; run it in a workflow, or remove this entry
+    expires: "2027-02-16"
+    category: D
