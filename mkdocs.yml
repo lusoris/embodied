@@ -2,6 +2,9 @@ site_name: emBodied
 site_description: >-
   A private, international adult platform for the realistic modelling, representation,
   discussion and experience of human bodies, sexuality and intimacy.
+site_url: !ENV [DOCS_SITE_URL, 'https://lusoris.github.io/embodied/']
+repo_url: https://github.com/lusoris/embodied
+repo_name: lusoris/embodied
 docs_dir: docs
 use_directory_urls: true
 
