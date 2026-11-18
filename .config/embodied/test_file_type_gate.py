@@ -64,6 +64,19 @@ class FileTypeGateTests(unittest.TestCase):
         self.git("add", "--force", "--", name)
         return self.run_gate()
 
+    def run_main_here(self, name, **patch):
+        """Run gate.main() in this process with the fixture env and cwd, gate.<name> patched.
+
+        Return (exit status, stderr text, the patch mock).
+        """
+        errors = io.StringIO()
+        with mock.patch.dict(os.environ, self.env, clear=True), \
+                mock.patch.object(gate.Path, "cwd", return_value=self.repo), \
+                mock.patch.object(gate, name, **patch) as patched, \
+                contextlib.redirect_stderr(errors):
+            status = gate.main()
+        return status, errors.getvalue(), patched
+
     def test_forced_add_fails_allow_list(self):
         """Verify force-staged disallowed paths fail with exit 1 and an A: allow-list error."""
         for name in ("photo.JPG", "export.json"):
@@ -224,28 +237,19 @@ class FileTypeGateTests(unittest.TestCase):
             self.git("add", "--force", "--", "late.md")
             return original(*args)
 
-        errors = io.StringIO()
-        with mock.patch.dict(os.environ, self.env, clear=True), \
-                mock.patch.object(gate.Path, "cwd", return_value=self.repo), \
-                mock.patch.object(gate, "list_ignored_paths", side_effect=change_index), \
-                contextlib.redirect_stderr(errors):
-            self.assertEqual(gate.main(), 1)
-        self.assertIn("index changed while the gate ran; rerun", errors.getvalue())
+        status, stderr, _ = self.run_main_here("list_ignored_paths", side_effect=change_index)
+        self.assertEqual(status, 1)
+        self.assertIn("index changed while the gate ran; rerun", stderr)
 
     def test_rejected_path_is_not_read_as_blob(self):
         """Report admission failures first and skip content reads for rejected paths."""
         (self.repo / "photo.jpg").write_bytes(b"binary\0")
         self.git("add", "--force", "--", "photo.jpg")
         oid = self.git("rev-parse", ":photo.jpg").decode().strip()
-        errors = io.StringIO()
-        with mock.patch.dict(os.environ, self.env, clear=True), \
-                mock.patch.object(gate.Path, "cwd", return_value=self.repo), \
-                mock.patch.object(gate, "read_staged_blobs",
-                                  wraps=gate.read_staged_blobs) as read, \
-                contextlib.redirect_stderr(errors):
-            self.assertEqual(gate.main(), 1)
-        self.assertIn("'photo.jpg': A:", errors.getvalue())
-        self.assertNotIn("'photo.jpg': B:", errors.getvalue())
+        status, stderr, read = self.run_main_here("read_staged_blobs", wraps=gate.read_staged_blobs)
+        self.assertEqual(status, 1)
+        self.assertIn("'photo.jpg': A:", stderr)
+        self.assertNotIn("'photo.jpg': B:", stderr)
         self.assertTrue(all(oid not in call.args[2] for call in read.call_args_list))
 
     def test_missing_staged_policy_fails_closed(self):
