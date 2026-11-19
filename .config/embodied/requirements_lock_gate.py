@@ -2,9 +2,10 @@
 # A lock is a tracked *.txt file whose header is the one `uv pip compile` or
 # `pip-compile` writes; its header command names the *.in inputs it was compiled from.
 # An input holds bare exact pins only (no extras, no markers). Every input pin must
-# equal the lock's pin, every lock entry annotated
-# `-r <input>` must still be pinned there, and every tracked *.in file must be named by
-# a lock header. Renovate's pip_requirements manager bumped the lock alone and left the
+# equal the lock's one pin for that package, which carries no environment marker; every
+# lock entry annotated `-r <input>` must still be pinned there (input paths are plain
+# tokens, so the annotations match); and every tracked *.in file must be named by a lock
+# header. Renovate's pip_requirements manager bumped the lock alone and left the
 # input pin stale (pull requests 16 and 20, 2026-11-19); this gate turns that into a
 # failing check offline, before the pull request reaches CI.
 # The header must open the file, as Renovate's pip-compile manager also requires. A lock
@@ -34,12 +35,17 @@ LOCK_MARKERS = (
 COMMAND_LINE = re.compile(r"^# {4}(?P<command>\S+)(?P<arguments> .*)?$")
 NAME = r"(?P<name>[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?)"
 VERSION = r"\s*==\s*(?P<version>[A-Za-z0-9][A-Za-z0-9.!+_-]*)\s*"
-# A lock entry may carry extras and an environment marker, as uv writes them.
-PIN = re.compile(rf"^{NAME}(?:\[[^\]]*\])?{VERSION}(?:;.*)?$")
+# A lock entry may carry extras and a non-empty environment marker, as uv writes them.
+PIN = re.compile(rf"^{NAME}(?:\[[^\]]*\])?{VERSION}(?P<marker>;\s*\S.*)?$")
 # An input line is a bare exact pin: the gate compares name and version only, so an
 # extra or a marker it cannot compare is refused rather than passed unread.
 INPUT_PIN = re.compile(rf"^{NAME}{VERSION}$")
-VIA_INPUT = re.compile(r"(?:^|\s)-r\s+(?P<source>\S+)$")
+# Input paths, in the header and in `-r` annotations, are one plain token: a quoted or
+# whitespace-bearing path cannot be matched between the two reliably, so it fails closed.
+PATH_TOKEN = r"[A-Za-z0-9._+/-]+"
+INPUT_PATH = re.compile(rf"^{PATH_TOKEN}$")
+VIA_FLAG = re.compile(r"(?:^|\s)-r(?:\s|$)")
+VIA_INPUT = re.compile(rf"(?:^|\s)-r\s+(?P<source>{PATH_TOKEN})$")
 INPUT_COMMENT = re.compile(r"(?:^|\s)#.*$")
 # A public version in PEP 440 normal form without epoch or local segment
 # (packaging.python.org/en/latest/specifications/version-specifiers/, "Normalization").
@@ -155,6 +161,8 @@ def command_inputs(path, command):
                 return None, f"{path}: header names --output-file more than once"
             output = os.path.normpath(os.path.join(base, argument.split("=", 1)[1]))
         elif not argument.startswith("-"):
+            if not INPUT_PATH.match(argument):
+                return None, f"{path}: header input {argument!r} is not a plain path of [A-Za-z0-9._+/-]"
             inputs.append(os.path.normpath(os.path.join(base, argument)))
         elif not (argument in BARE_FLAGS or OPTION_WITH_VALUE.match(argument)):
             return None, f"{path}: header option {argument} is not in this gate's allow-list"
@@ -193,12 +201,28 @@ def input_pins(path, text):
     return pins, errors
 
 
+def annotation_source(path, number, comment):
+    """Return (input, error) for indented lock comment, input being the `-r` path it names or None.
+
+    An `-r` annotation must name one plain path; anything else (a quoted or whitespace-bearing
+    path, or no path) is an error, since the stale-entry check could not match it to an input.
+    """
+    text = comment.lstrip("# ")
+    if not VIA_FLAG.search(text):
+        return None, None
+    found = VIA_INPUT.search(text)
+    if not found:
+        return None, f"{path}:{number}: -r annotation does not name one plain path: {comment}"
+    return os.path.normpath(found.group("source")), None
+
+
 def lock_entries(path, text):
-    """Parse lock file path from text into ({name: {version: written}}, {name: inputs}, errors).
+    """Parse lock path's text into ({name: {(version, marker): written}}, {name: inputs}, errors).
 
     Column-0 lines must be comments or pins; indented lines must be hashes or comments,
     whose `-r <input>` annotations (paths normalised, so ./requirements.in reads as
-    requirements.in) record which inputs asked for the entry above them.
+    requirements.in) record which inputs asked for the entry above them. marker is the
+    entry's environment marker, or "" for an entry installed everywhere.
     """
     versions, via, errors, current = {}, {}, [], None
     for number, raw in enumerate(text.splitlines(), start=1):
@@ -207,9 +231,11 @@ def lock_entries(path, text):
             continue
         if raw[0].isspace():
             if stripped.startswith("#") and current:
-                found = VIA_INPUT.search(stripped.lstrip("# "))
-                if found:
-                    via.setdefault(current, set()).add(os.path.normpath(found.group("source")))
+                source, error = annotation_source(path, number, stripped)
+                if error:
+                    errors.append(error)
+                elif source:
+                    via.setdefault(current, set()).add(source)
             elif not (stripped.startswith("--hash=") or stripped.startswith("#")):
                 errors.append(f"{path}:{number}: unexpected indented line: {stripped}")
             continue
@@ -219,23 +245,27 @@ def lock_entries(path, text):
             current = None
             continue
         current = canonical_name(match.group("name"))
-        version = match.group("version")
-        # A version outside normal form keeps its spelling, so it can never equal an input pin.
-        versions.setdefault(current, {})[canonical_version(version) or version] = version
+        version, marker = match.group("version"), (match.group("marker") or ";")[1:].strip()
+        # A version outside normal form keeps its spelling, so it can never equal an input pin;
+        # a marked entry keeps its marker, so it can never satisfy an unconditional input pin.
+        written = version + (f" ; {marker}" if marker else "")
+        versions.setdefault(current, {})[(canonical_version(version) or version, marker)] = written
     return versions, via, errors
 
 
 def compare_pair(lock, source, pins, versions, via, written):
     """Return drift errors between input source's pins and lock's entries.
 
-    written is the input path as the header spells it, which `-r` annotations repeat.
+    written is the input path as the header spells it, which `-r` annotations repeat. An
+    input pin holds on every platform, so its lock entry must be one at that version with
+    no environment marker; marked entries of other packages are not compared.
     """
     errors = []
     for name, (label, version) in sorted(pins.items()):
         locked = versions.get(name)
         if not locked:
             errors.append(f"{source}: {label} has no entry in {lock}")
-        elif set(locked) != {version}:
+        elif set(locked) != {(version, "")}:
             found = ", ".join(sorted(locked.values()))
             errors.append(f"{source}: {label} but {lock} pins {found}")
     for name, sources in sorted(via.items()):

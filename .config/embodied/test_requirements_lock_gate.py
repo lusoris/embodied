@@ -96,20 +96,66 @@ class ParserTests(unittest.TestCase):
         ])
         versions, via, errors = gate.lock_entries("r.txt", text)
         self.assertEqual(errors, [])
-        self.assertEqual(versions["numpy"], {"2": "2.0", "2.1": "2.1"})
-        self.assertEqual(versions["colorama"], {"0.4.6": "0.4.6"})
-        self.assertEqual(versions["pyyaml"], {"6.0RC1": "6.0RC1"})
+        self.assertEqual(versions["numpy"], {
+            ("2", "python_full_version < '3.12'"): "2.0 ; python_full_version < '3.12'",
+            ("2.1", "python_full_version >= '3.12'"): "2.1 ; python_full_version >= '3.12'"})
+        self.assertEqual(versions["colorama"], {("0.4.6", "sys_platform == 'win32'"):
+                                                "0.4.6 ; sys_platform == 'win32'"})
+        self.assertEqual(versions["mkdocs"], {("1.6.1", ""): "1.6.1"})
+        self.assertEqual(versions["pyyaml"], {("6.0RC1", ""): "6.0RC1"})
         self.assertEqual(via, {"mkdocs": {"requirements.in"},
                                "mkdocs-minify-plugin": {"requirements.in"},
                                "pymdown-extensions": {"requirements.in"}})
 
     def test_lock_entries_refuse_unknown_lines(self):
-        """Verify an index option or stray indented text is an error, never skipped."""
+        """Verify an index option, stray indented text or an empty marker is an error, never skipped."""
         for text in (UV_HEADER + "--index-url https://example.invalid\n",
-                     UV_HEADER + "mkdocs==1.6.1 \\\n    stray\n"):
+                     UV_HEADER + "mkdocs==1.6.1 \\\n    stray\n",
+                     UV_HEADER + "mkdocs==1.6.1 ;\n", UV_HEADER + "mkdocs==1.6.1 ; \\\n" + HASH):
             with self.subTest(text=text.splitlines()[-1]):
                 _, _, errors = gate.lock_entries("r.txt", text)
                 self.assertEqual(len(errors), 1)
+
+    def test_lock_entries_refuse_input_annotations_naming_no_plain_path(self):
+        """Verify a quoted, whitespace-bearing or missing -r path is an error, never skipped."""
+        for annotation in ("# via -r docs requirements.in", '#   -r "requirements.in"',
+                           "#   -r 'requirements.in'", "# via -r", "#   -r",
+                           "#   -r docs\trequirements.in", "#   -r requirements.in;x"):
+            with self.subTest(annotation=annotation):
+                versions, via, errors = gate.lock_entries(
+                    "r.txt", lock_text([("old-plugin==2.0", [annotation])]))
+                self.assertEqual(via, {})
+                self.assertEqual(errors, [f"r.txt:5: -r annotation does not name one plain path: "
+                                          f"{annotation}"])
+                self.assertEqual(versions, {"old-plugin": {("2", ""): "2.0"}})
+
+    def test_lock_entries_read_plain_input_paths_and_skip_other_annotations(self):
+        """Verify every allowed path character records and -c or prose annotations record nothing."""
+        text = lock_text([("a==1", ["#   -r docs/a_b-c+d.in"]), ("b==1", ["# via -r ../x.in"]),
+                          ("c==1", ["# via -c constraints.txt"]), ("d==1", ["# via mkdocs-r"])])
+        _, via, errors = gate.lock_entries("r.txt", text)
+        self.assertEqual(errors, [])
+        self.assertEqual(via, {"a": {"docs/a_b-c+d.in"}, "b": {"../x.in"}})
+
+    def test_compare_pair_requires_one_unmarked_entry_per_direct_pin(self):
+        """Verify a direct pin locked under a marker fails while marked transitive entries pass."""
+        pins = {"mkdocs": ("mkdocs==1.6.1", "1.6.1")}
+        win = "sys_platform == 'win32'"
+        cases = (
+            ([("mkdocs==1.6.1", []), (f"colorama==0.4.6 ; {win}", [])], []),
+            ([(f"mkdocs==1.6.1 ; {win}", [])], [f"r.in: mkdocs==1.6.1 but r.txt pins 1.6.1 ; {win}"]),
+            ([("mkdocs==1.6.1", []), (f"mkdocs==1.6.1 ; {win}", [])],
+             [f"r.in: mkdocs==1.6.1 but r.txt pins 1.6.1, 1.6.1 ; {win}"]),
+            ([("mkdocs==1.6.0 ; python_version < '3.12'", []),
+              ("mkdocs==1.6.1 ; python_version >= '3.12'", [])],
+             ["r.in: mkdocs==1.6.1 but r.txt pins 1.6.0 ; python_version < '3.12', "
+              "1.6.1 ; python_version >= '3.12'"]),
+        )
+        for entries, expected in cases:
+            with self.subTest(entries=[pin for pin, _ in entries]):
+                versions, via, errors = gate.lock_entries("r.txt", lock_text(entries))
+                self.assertEqual(errors, [])
+                self.assertEqual(gate.compare_pair("r.txt", "r.in", pins, versions, via, "r.in"), expected)
 
     def test_lock_header_classifies_uv_pip_compile_prelude_and_plain_text(self):
         """Verify uv and pip-compile headers are locks, a prelude is unchecked, prose is none."""
@@ -135,7 +181,16 @@ class ParserTests(unittest.TestCase):
                          (["a/b/requirements.in"], None))
         self.assertEqual(gate.command_inputs("requirements.txt", command),
                          (["requirements.in"], None))
+        self.assertEqual(gate.command_inputs("requirements.txt", "uv pip compile ./docs/a_b-c+d.in "
+                                                                 "--output-file=requirements.txt"),
+                         (["docs/a_b-c+d.in"], None))
         for path, line in (("a/other.txt", command),
+                           ("requirements.txt", "uv pip compile 'docs requirements.in' "
+                                                "--output-file=requirements.txt"),
+                           ("requirements.txt", "uv pip compile \"req'uirements.in\" "
+                                                "--output-file=requirements.txt"),
+                           ("requirements.txt", "uv pip compile 'requirements.in;x' "
+                                                "--output-file=requirements.txt"),
                            ("requirements.txt", "uv pip compile --output-file=requirements.txt"),
                            ("requirements.txt", "uv pip compile 'unbalanced"),
                            ("requirements.txt", "uv venv requirements.in"),
@@ -388,6 +443,35 @@ class RepositoryTests(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertIn("requirements.in:1: not an exact name==version pin (extras and markers are refused)",
                       result.stderr)
+
+    def test_direct_pin_locked_only_under_a_marker_fails(self):
+        """Verify an unconditional input pin whose only lock entry is Windows-only fails with exit 1."""
+        self.track("requirements.in", "mkdocs==1.6.1\n")
+        self.track("requirements.txt", lock_text([
+            ("mkdocs==1.6.1 ; sys_platform == 'win32'", ["# via -r requirements.in"])]))
+        result = self.run_gate()
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("requirements.in: mkdocs==1.6.1 but requirements.txt pins "
+                      "1.6.1 ; sys_platform == 'win32'", result.stderr)
+
+    def test_input_path_with_whitespace_fails_in_header_and_annotation(self):
+        """Verify a whitespace-bearing input path fails with exit 1 in the header or an annotation."""
+        header = UV_HEADER.replace("requirements.in --output", "'docs requirements.in' --output")
+        self.track("docs requirements.in", "mkdocs==1.6.1\n")
+        self.track("requirements.in", "mkdocs==1.6.1\n")
+        cases = (
+            (lock_text([("mkdocs==1.6.1", ["# via -r docs requirements.in"])], header=header),
+             "requirements.txt: header input 'docs requirements.in' is not a plain path"),
+            (lock_text([("mkdocs==1.6.1", ["# via -r requirements.in"]),
+                        ("old-plugin==2.0", ["# via -r docs requirements.in"])]),
+             "requirements.txt:8: -r annotation does not name one plain path"),
+        )
+        for lock, expected in cases:
+            with self.subTest(expected=expected):
+                self.track("requirements.txt", lock)
+                result = self.run_gate()
+                self.assertEqual(result.returncode, 1)
+                self.assertIn(expected, result.stderr)
 
     def test_lock_naming_non_input_file_fails(self):
         """Verify a lock whose header input is not a *.in file fails with exit 1."""
