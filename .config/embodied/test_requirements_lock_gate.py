@@ -1,13 +1,12 @@
 """Replay the requirements lock gate on parser cases and isolated Git fixtures."""
 
-import os
 from pathlib import Path
 import shutil
 import subprocess
 import sys
-import tempfile
 import unittest
 
+from git_fixture import isolated_repository
 import requirements_lock_gate as gate
 
 
@@ -132,18 +131,7 @@ class ParserTests(unittest.TestCase):
 class RepositoryTests(unittest.TestCase):
     def setUp(self):
         """Create an isolated temporary Git fixture holding a copy of the gate script."""
-        state = ROOT / ".workingdir"
-        state.mkdir(exist_ok=True)
-        self.fixture = tempfile.TemporaryDirectory(prefix="requirements-lock-", dir=state)
-        self.addCleanup(self.fixture.cleanup)
-        self.repo = Path(self.fixture.name)
-        self.env = {key: value for key, value in os.environ.items()
-                    if not key.startswith("GIT_")}
-        self.env["GIT_CONFIG_GLOBAL"] = os.devnull
-        self.env["GIT_CONFIG_NOSYSTEM"] = "1"
-        template = self.repo / "empty-template"
-        template.mkdir()
-        self.git("init", "--quiet", f"--template={template}")
+        self.repo, self.env = isolated_repository(self, "requirements-lock-")
         (self.repo / GATE).parent.mkdir(parents=True)
         shutil.copyfile(ROOT / GATE, self.repo / GATE)
 

@@ -7,11 +7,11 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
-import tempfile
 import unittest
 from unittest import mock
 
 import file_type_gate as gate
+from git_fixture import isolated_repository
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -21,18 +21,7 @@ GATE = Path(".config/embodied/file_type_gate.py")
 class FileTypeGateTests(unittest.TestCase):
     def setUp(self):
         """Create an isolated temporary Git fixture with root .gitignore and the gate script."""
-        state = ROOT / ".workingdir"
-        state.mkdir(exist_ok=True)
-        self.fixture = tempfile.TemporaryDirectory(prefix="file-type-", dir=state)
-        self.addCleanup(self.fixture.cleanup)
-        self.repo = Path(self.fixture.name)
-        self.env = {key: value for key, value in os.environ.items()
-                    if not key.startswith("GIT_")}
-        self.env["GIT_CONFIG_GLOBAL"] = os.devnull
-        self.env["GIT_CONFIG_NOSYSTEM"] = "1"
-        template = self.repo / "empty-template"
-        template.mkdir()
-        self.git("init", "--quiet", f"--template={template}")
+        self.repo, self.env = isolated_repository(self, "file-type-")
         shutil.copyfile(ROOT / ".gitignore", self.repo / ".gitignore")
         self.git("add", "--force", "--", ".gitignore")
         (self.repo / GATE).parent.mkdir(parents=True)
