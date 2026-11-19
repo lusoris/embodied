@@ -6,6 +6,6 @@
 #   uv pip compile --universal --generate-hashes --python-version=3.11 \
 #     requirements.in --output-file=requirements.txt
 mkdocs==1.6.1
-mkdocs-material==9.8.0
+mkdocs-material==9.8.1
 mkdocs-minify-plugin==0.8.0
 pymdown-extensions==12.3
