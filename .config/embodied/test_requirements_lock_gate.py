@@ -1,9 +1,11 @@
 """Replay the requirements lock gate on parser cases and isolated Git fixtures."""
 
+import ast
 from pathlib import Path
 import shutil
 import subprocess
 import sys
+import time
 import unittest
 from unittest import mock
 
@@ -151,6 +153,118 @@ class ParserTests(unittest.TestCase):
                 self.assertTrue(error.startswith(f"{path}: "))
 
 
+def run_time_program_calls(source):
+    """Return the lines of subprocess calls in source whose program is not a string literal.
+
+    Allow-list mirroring the opengrep rule dangerous-subprocess-use-audit, which fails the
+    Sourcery review check: the first positional argument is a str literal, or a list or
+    tuple whose first element is one (the rule exempts no args= keyword form). The rule's
+    two exception constructors are not process calls; every other call shape is reported.
+    """
+    lines = []
+    for node in ast.walk(ast.parse(source)):
+        func = getattr(node, "func", None)
+        if not (isinstance(node, ast.Call) and isinstance(func, ast.Attribute)
+                and isinstance(func.value, ast.Name) and func.value.id == "subprocess"):
+            continue
+        if func.attr in ("CalledProcessError", "SubprocessError"):
+            continue
+        program = node.args[0] if node.args else None
+        if isinstance(program, (ast.List, ast.Tuple)) and program.elts:
+            program = program.elts[0]
+        if not (isinstance(program, ast.Constant) and isinstance(program.value, str)):
+            lines.append(node.lineno)
+    return lines
+
+
+class SourceShapeTests(unittest.TestCase):
+    def test_gate_names_every_program_as_a_string_literal(self):
+        """Verify the gate's subprocess calls all start their argument list with a literal."""
+        self.assertEqual(run_time_program_calls((ROOT / GATE).read_text(encoding="utf-8")), [])
+
+    def test_run_time_program_names_are_reported(self):
+        """Verify a variable, starred, empty or keyword program argument is reported."""
+        for call in ("subprocess.run([git, 'ls-files'], timeout=30)", "subprocess.run(command)",
+                     "subprocess.run([*command], timeout=30)", "subprocess.run([])",
+                     "subprocess.Popen(args=[tool, '-v'])", "subprocess.check_output((tool,))",
+                     "subprocess.run(timeout=30)", "subprocess.TimeoutExpired(cmd, 30)",
+                     "subprocess.run(args=['git'])"):
+            with self.subTest(call=call):
+                self.assertEqual(run_time_program_calls(f"import subprocess\n{call}\n"), [2])
+
+    def test_literal_program_shapes_and_exception_constructors_pass(self):
+        """Verify a literal string, list or tuple program and the rule's exceptions pass."""
+        for call in ("subprocess.run('git')", "subprocess.run(['git', *arguments], executable=git)",
+                     "subprocess.run(('git', 'status'), timeout=30)",
+                     "subprocess.CalledProcessError(1, cmd)", "subprocess.SubprocessError()",
+                     "other.run([git])", "subprocess.DEVNULL"):
+            with self.subTest(call=call):
+                self.assertEqual(run_time_program_calls(f"import subprocess\n{call}\n"), [])
+
+
+WRITE_4_MIB = "import sys\nfor _ in range(64):\n    sys.stdout.buffer.write(b'x' * 65536)\n"
+CLOSE_STDOUT_WRITE_1_MIB_STDERR = ("import os, sys\nos.close(1)\nfor _ in range(16):\n"
+                                   "    sys.stderr.buffer.write(b'e' * 65536)\n")
+
+
+def spawn(code):
+    """Start a Python child running code with stdin closed and stdout and stderr piped."""
+    return subprocess.Popen([sys.executable, "-I", "-c", code], stdin=subprocess.DEVNULL,
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+
+class BoundedReadTests(unittest.TestCase):
+    def test_output_at_the_limit_is_read_whole(self):
+        """Verify exactly limit bytes, stderr and a non-zero exit come back with no problem."""
+        process = spawn("import sys; sys.stdout.write('abcd'); sys.stderr.write('err'); sys.exit(3)")
+        self.assertEqual(gate.read_bounded(process, 4, 20), (b"abcd", b"err", 3, None))
+
+    def test_one_byte_past_the_limit_is_a_limit_problem(self):
+        """Verify limit + 1 bytes report the limit and return only limit bytes."""
+        stdout, _, _, problem = gate.read_bounded(spawn("print('abcd', end='!')"), 4, 20)
+        self.assertEqual((stdout, problem), (b"abcd", "limit"))
+
+    def test_a_writer_past_the_limit_is_killed_before_it_finishes(self):
+        """Verify a 4 MiB writer is stopped after limit + 1 bytes, long before the deadline."""
+        started = time.monotonic()
+        stdout, _, returncode, problem = gate.read_bounded(spawn(WRITE_4_MIB), 1000, 20)
+        self.assertEqual((len(stdout), problem), (1000, "limit"))
+        self.assertNotEqual(returncode, 0)
+        self.assertLess(time.monotonic() - started, 10)
+
+    def test_stderr_past_its_cap_is_not_read(self):
+        """Verify stderr stops at MAX_GIT_STDERR_BYTES and the deadline ends the blocked writer."""
+        _, stderr, returncode, problem = gate.read_bounded(spawn(CLOSE_STDOUT_WRITE_1_MIB_STDERR), 10, 1)
+        self.assertEqual((len(stderr), problem), (gate.MAX_GIT_STDERR_BYTES, "deadline"))
+        self.assertNotEqual(returncode, 0)
+
+    def test_a_silent_process_is_killed_at_the_deadline(self):
+        """Verify a process that writes nothing and outlives the deadline is killed and flagged."""
+        started = time.monotonic()
+        stdout, _, returncode, problem = gate.read_bounded(spawn("import time; time.sleep(20)"), 10, 0.5)
+        self.assertEqual((stdout, problem), (b"", "deadline"))
+        self.assertNotEqual(returncode, 0)
+        self.assertLess(time.monotonic() - started, 10)
+
+    def test_run_git_returns_output_or_names_each_problem(self):
+        """Verify run_git returns stdout, and names a missing binary, a cap, the deadline and an exit."""
+        git, real = shutil.which("git"), gate.read_bounded
+        stdout, error = gate.run_git(git, ["--version"], None)
+        self.assertTrue(stdout.startswith(b"git version") and error is None)
+        missing = gate.run_git(str(ROOT / "no-such-git"), ["--version"], None)
+        self.assertTrue(missing[0] is None and missing[1].startswith("git --version failed: "))
+        for result, expected in (
+                ((b"", b"", -9, "limit"), f"git --version wrote more than the {gate.MAX_LISTING_BYTES} byte limit"),
+                ((b"", b"", -9, "deadline"), f"git --version ran past the {gate.GIT_DEADLINE_SECONDS} s deadline"),
+                ((b"", b"bad\n", 3, None), "git --version failed (exit 3): bad")):
+            def replaced(process, limit, deadline, result=result):
+                """Drain git with the real reader, then report the planted result."""
+                real(process, limit, deadline)
+                return result
+            with self.subTest(expected=expected), mock.patch.object(gate, "read_bounded", side_effect=replaced):
+                self.assertEqual(gate.run_git(git, ["--version"], None), (None, expected))
+
+
 class RepositoryTests(unittest.TestCase):
     def setUp(self):
         """Create an isolated temporary Git fixture holding a copy of the gate script."""
@@ -213,7 +327,7 @@ class RepositoryTests(unittest.TestCase):
         self.track("b.in", "")
         listing = len("a.in\0b.in\0")
         cases = (((2, listing), None), ((1, listing), "listed 2 paths, above the 1 limit"),
-                 ((2, listing - 1), f"wrote {listing} bytes, above the {listing - 1} byte limit"))
+                 ((2, listing - 1), f"wrote more than the {listing - 1} byte limit"))
         for (max_paths, max_bytes), expected in cases:
             with self.subTest(max_paths=max_paths, max_bytes=max_bytes), \
                     mock.patch.object(gate, "MAX_TRACKED_PATHS", max_paths), \
