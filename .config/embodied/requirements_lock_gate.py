@@ -223,6 +223,7 @@ def lock_entries(path, text):
     whose `-r <input>` annotations (paths normalised, so ./requirements.in reads as
     requirements.in) record which inputs asked for the entry above them. marker is the
     entry's environment marker, or "" for an entry installed everywhere.
+    Repeated entries with the same normalised version and marker are errors.
     """
     versions, via, errors, current = {}, {}, [], None
     for number, raw in enumerate(text.splitlines(), start=1):
@@ -249,7 +250,11 @@ def lock_entries(path, text):
         # A version outside normal form keeps its spelling, so it can never equal an input pin;
         # a marked entry keeps its marker, so it can never satisfy an unconditional input pin.
         written = version + (f" ; {marker}" if marker else "")
-        versions.setdefault(current, {})[(canonical_version(version) or version, marker)] = written
+        key = (canonical_version(version) or version, marker)
+        entries = versions.setdefault(current, {})
+        if key in entries:
+            errors.append(f"{path}:{number}: duplicate lock entry for {current}: {written}")
+        entries[key] = written
     return versions, via, errors
 
 

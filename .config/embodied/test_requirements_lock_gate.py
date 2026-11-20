@@ -107,6 +107,23 @@ class ParserTests(unittest.TestCase):
                                "mkdocs-minify-plugin": {"requirements.in"},
                                "pymdown-extensions": {"requirements.in"}})
 
+    def test_lock_entries_refuse_duplicate_normalized_entries(self):
+        """Verify duplicate pins fail while distinct markers remain separate entries."""
+        win = "sys_platform == 'win32'"
+        cases = (
+            ("identical", "mkdocs==1.6.1", "mkdocs==1.6.1",
+             ["r.txt:5: duplicate lock entry for mkdocs: 1.6.1"]),
+            ("normalized", "mkdocs==1.6.1", "MkDocs==1.6.1.0",
+             ["r.txt:5: duplicate lock entry for mkdocs: 1.6.1.0"]),
+            ("marked", f"mkdocs==1.6.1 ; {win}", f"mkdocs==1.6.1 ; {win}",
+             [f"r.txt:5: duplicate lock entry for mkdocs: 1.6.1 ; {win}"]),
+            ("distinct markers", "mkdocs==1.6.1", f"mkdocs==1.6.1 ; {win}", []),
+        )
+        for label, first, second, expected in cases:
+            with self.subTest(case=label):
+                _, _, errors = gate.lock_entries("r.txt", lock_text([(first, []), (second, [])]))
+                self.assertEqual(errors, expected)
+
     def test_lock_entries_refuse_unknown_lines(self):
         """Verify an index option, stray indented text or an empty marker is an error, never skipped."""
         for text in (UV_HEADER + "--index-url https://example.invalid\n",
@@ -363,6 +380,15 @@ class RepositoryTests(unittest.TestCase):
         self.assertIn("pins agree with their inputs: .config/mkdocs/build-requirements.txt, "
                       ".config/mkdocs/requirements.txt\n", result.stdout)
         self.assertIn(f"not checked: {REUSE_LOCK}: lock header does not open the file", result.stdout)
+
+    def test_duplicate_lock_entry_fails(self):
+        """Verify a repeated lock entry makes the repository gate fail with its line number."""
+        self.track("requirements.in", "mkdocs==1.6.1\n")
+        entry = ("mkdocs==1.6.1", ["# via -r requirements.in"])
+        self.track("requirements.txt", lock_text([entry, entry]))
+        result = self.run_gate()
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("requirements.txt:6: duplicate lock entry for mkdocs: 1.6.1", result.stderr)
 
     def test_byte_order_mark_fails(self):
         """Verify an input or lock opening with a UTF-8 byte order mark fails with exit 1."""
