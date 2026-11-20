@@ -1,7 +1,8 @@
 ---
-# Gate documentation style, strict rendering, text-only file admission and secret
-# history scanning so the public repository keeps its documentation data boundary,
-# and deploy the built site to GitHub Pages from main.
+# Gate documentation style, strict rendering from locks that agree with their
+# inputs, text-only file admission and secret history scanning so the public
+# repository keeps its documentation data boundary, and deploy the built site to
+# GitHub Pages from main.
 name: Docs
 
 'on':
@@ -68,6 +69,9 @@ jobs:
           github.event_name == 'workflow_dispatch') &&
           github.ref == 'refs/heads/main'
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d  # v6.0.0
+      - name: Check compiled lock pins against their inputs
+        if: github.event.pull_request.draft != true
+        run: python3 -I .config/embodied/requirements_lock_gate.py
       - name: Build documentation strictly
         if: github.event.pull_request.draft != true
         env:
@@ -119,7 +123,7 @@ jobs:
       - name: Check tracked file admission and text content
         if: github.event.pull_request.draft != true
         run: python3 -I .config/embodied/file_type_gate.py
-      - name: Replay planted file admission cases
+      - name: Replay planted file admission and lock drift cases
         if: github.event.pull_request.draft != true
         run: python3 -I -m unittest discover -s .config/embodied -p 'test_*.py'
   gitleaks:

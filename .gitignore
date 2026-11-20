@@ -54,8 +54,11 @@
 # Repository tooling, admitted one exact path each.
 !/renovate.json
 !/.config/embodied/file_type_gate.py
+!/.config/embodied/git_fixture.py
+!/.config/embodied/requirements_lock_gate.py
 !/.config/embodied/secret_scan.py
 !/.config/embodied/test_file_type_gate.py
+!/.config/embodied/test_requirements_lock_gate.py
 !/.config/embodied/test_secret_scan.py
 !/.config/mkdocs/build-requirements.in
 !/.config/mkdocs/build-requirements.txt
