@@ -202,18 +202,21 @@ def input_pins(path, text):
 
 
 def annotation_source(path, number, comment):
-    """Return (input, error) for indented lock comment, input being the `-r` path it names or None.
+    """Return (inputs, error) for an indented lock comment's normalised `-r` paths.
 
     An `-r` annotation must name one plain path; anything else (a quoted or whitespace-bearing
     path, or no path) is an error, since the stale-entry check could not match it to an input.
     """
-    text = comment.lstrip("# ")
-    if not VIA_FLAG.search(text):
-        return None, None
-    found = VIA_INPUT.search(text)
-    if not found:
-        return None, f"{path}:{number}: -r annotation does not name one plain path: {comment}"
-    return os.path.normpath(found.group("source")), None
+    text = re.sub(r"^via(?:\s+|$)", "", comment.lstrip("# "), count=1)
+    sources = []
+    for item in text.split(","):
+        item = item.strip()
+        if VIA_FLAG.search(item):
+            found = VIA_INPUT.fullmatch(item)
+            if not found:
+                return [], f"{path}:{number}: -r annotation does not name one plain path: {comment}"
+            sources.append(os.path.normpath(found.group("source")))
+    return sources, None
 
 
 def lock_entries(path, text):
@@ -232,11 +235,11 @@ def lock_entries(path, text):
             continue
         if raw[0].isspace():
             if stripped.startswith("#") and current:
-                source, error = annotation_source(path, number, stripped)
+                sources, error = annotation_source(path, number, stripped)
                 if error:
                     errors.append(error)
-                elif source:
-                    via.setdefault(current, set()).add(source)
+                elif sources:
+                    via.setdefault(current, set()).update(sources)
             elif not (stripped.startswith("--hash=") or stripped.startswith("#")):
                 errors.append(f"{path}:{number}: unexpected indented line: {stripped}")
             continue
