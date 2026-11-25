@@ -34,6 +34,13 @@
         "cordanaLLM/praetor/**"
       ],
       "enabled": false
+    },
+    {
+      "description": "praetor workflow engine commit pin: git-refs digests carry no release timestamp, so the preset's three-day release age would hold every update as pending",
+      "matchDepNames": [
+        "praetor-workflow-engine-pin"
+      ],
+      "minimumReleaseAge": null
     }
   ],
   "customManagers": [
