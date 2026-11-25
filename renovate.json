@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
+    "github>plurano/horistes"
   ],
   "pip-compile": {
     "description": "Bump the pin in the requirements input and recompile the lock from its header command, so the two never drift",
@@ -34,6 +34,13 @@
         "cordanaLLM/praetor/**"
       ],
       "enabled": false
+    },
+    {
+      "description": "praetor workflow engine commit pin: git-refs digests carry no release timestamp, so the preset's three-day release age would hold every update as pending",
+      "matchDepNames": [
+        "praetor-workflow-engine-pin"
+      ],
+      "minimumReleaseAge": null
     }
   ],
   "customManagers": [
